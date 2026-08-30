@@ -1,0 +1,9 @@
+.env
+.env.*
+*.bak
+*.bak.*
+id_rsa
+id_ed25519
+*.pem
+*.key
+.DS_Store

@@ -1,0 +1,9 @@
+aspnet-runtime
+docker
+docker-compose
+dotnet-runtime
+dotnet-sdk
+fail2ban
+nmap
+ufw
+wireshark-qt

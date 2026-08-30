@@ -1,0 +1,65 @@
+{
+  "layer": "top",
+  "reload_on_style_change": true,
+  "position": "top",
+  "passthrough": false,
+  "reload_style_on_change": true,
+  "spacing": 10,
+  "margin-top": 0,
+  "margin-left": 0,
+  "margin-right": 0,
+  "margin-bottom": 1,
+  "modules-left": ["custom/icon", "sway/window"],
+  "modules-center": ["ext/workspaces"],
+  "modules-right": ["tray", "clock"],
+  "custom/icon": {
+    "format": ""
+  },
+  "sway/window": {
+    "separate-outputs": true,
+    "format": "{class}",
+    "rewrite": {
+      "": "gs",
+      "kitty": "Kel'thuzad",
+      "foot": "Terminal",
+      "firefox": "Browser"
+    }
+  },
+  "ext/workspaces": {
+    "on-click": "activate",
+    "all-outputs": false,
+    "sort-by-id": true,
+    "format": "{icon}",
+    "format-icons": {
+      "1": "i",
+      "2": "ii",
+      "3": "iii",
+      "4": "iv",
+      "5": "v",
+      "6": "i",
+      "7": "ii",
+      "8": "iii",
+      "9": "iv",
+      "10": "v"
+    }
+  },
+  "tray": {
+    "icon-size": 16,
+    "spacing": 5,
+    "show-passive-items": true
+  },
+  "clock": {
+    "format": "<span></span>  {:%d/%m %H:%M}",
+    "interval": 1,
+    "tooltip-format": "<tt>{calendar}</tt>",
+    "calendar": {
+      "format": {
+        "today": "<span color='#eed49f'><b>{}</b></span>"
+      }
+    },
+    "actions": {
+      "on-click-right": "shift_down",
+      "on-click": "shift_up"
+    }
+  }
+}
