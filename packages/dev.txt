@@ -1,9 +1,8 @@
 aspnet-runtime
-docker
 docker-compose
 dotnet-runtime
 dotnet-sdk
 fail2ban
+fnm-bin
 nmap
-ufw
 wireshark-qt

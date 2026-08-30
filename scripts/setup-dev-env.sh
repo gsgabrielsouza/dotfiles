@@ -8,6 +8,7 @@ fi
 
 script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 compose_file="${script_dir}/pentest/docker-compose.yml"
+dockerfile="${script_dir}/pentest/Dockerfile"
 zshrc_local="${HOME}/.zshrc.local"
 dotnet_path_line='export PATH="$HOME/.dotnet/tools:$PATH"'
 fnm_eval_line='eval "$(fnm env --use-on-cd --shell zsh)"'
@@ -285,10 +286,13 @@ install_pentest_isolated() {
   ensure_pacman wireshark-qt wireshark
   ensure_group wireshark
 
-  if [[ -f ${compose_file} ]]; then
-    log "docker-compose de pentest ja existe; nao sobrescrevendo ${compose_file}"
-  else
+  if [[ ! -f ${compose_file} ]]; then
     log "Arquivo ${compose_file} ausente"
+    return 1
+  fi
+
+  if [[ ! -f ${dockerfile} ]]; then
+    log "Arquivo ${dockerfile} ausente"
     return 1
   fi
 
@@ -297,12 +301,10 @@ install_pentest_isolated() {
     return 1
   fi
 
-  if docker_exec ps -a --format '{{.Names}}' | grep -Fxq pentest-kali; then
-    log "Pulando lab Kali: container pentest-kali ja existe"
-  else
-    log "Subindo lab Kali na rede pentest-isolated (sem publicar portas no host)"
-    compose_exec -f "$compose_file" up -d
-  fi
+  ensure_docker_compose
+
+  log "Subindo lab na rede pentest-isolated (alvos so em 127.0.0.1; ofensivo so no Kali)"
+  compose_exec -f "$compose_file" up -d
   log "install_pentest_isolated concluido"
 }
 
@@ -364,7 +366,7 @@ main() {
     log "Bloco 1 ignorado"
   fi
 
-  if confirm "Bloco 2 — diagnostico de rede no host + lab Kali isolado?"; then
+  if confirm "Bloco 2 — diagnostico de rede no host + lab Kali e alvos isolados?"; then
     install_pentest_isolated
   else
     log "Bloco 2 ignorado"

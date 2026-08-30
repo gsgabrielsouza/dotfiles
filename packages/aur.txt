@@ -1,2 +1,4 @@
 cursor-bin
 enpass-bin
+fnm-bin
+

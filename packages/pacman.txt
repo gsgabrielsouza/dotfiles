@@ -2,6 +2,7 @@ adw-gtk-theme
 base-devel
 breeze-icons
 brightnessctl
+chromium
 docker
 eog
 fastfetch
@@ -23,6 +24,7 @@ playerctl
 power-profiles-daemon
 qt5ct
 qt6ct
+slurp
 starship
 sway
 swaybg
@@ -32,6 +34,7 @@ ttf-jetbrains-mono-nerd
 ufw
 waybar
 wireplumber
+wl-clipboard
 wofi
 xdg-desktop-portal
 xdg-desktop-portal-gtk

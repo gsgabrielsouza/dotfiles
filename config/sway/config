@@ -103,7 +103,7 @@ bindsym --locked XF86AudioNext exec playerctl next
 bindsym --locked XF86AudioStop exec playerctl stop
 bindsym --locked XF86MonBrightnessDown exec brightnessctl set 5%-
 bindsym --locked XF86MonBrightnessUp exec brightnessctl set 5%+
-bindsym Print exec grim
+bindsym Print exec sh -c 'grim -g "$(slurp)"'
 
 include /etc/sway/config.d/*
 include ~/.config/sway/config.d/*
