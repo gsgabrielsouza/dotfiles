@@ -1,14 +1,60 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ ${EUID} -eq 0 ]]; then
-  printf '%s\n' "Execute como usuario comum, com sudo disponivel." >&2
-  exit 1
-fi
+run_privileged() {
+  if [[ ${EUID} -eq 0 ]]; then
+    "$@"
+  else
+    sudo "$@"
+  fi
+}
+
+aur_user=
+aur_sudoers=
+
+cleanup_aur_builder() {
+  if [[ -n ${aur_sudoers} ]]; then
+    rm -f "$aur_sudoers"
+  fi
+  if [[ -n ${aur_user} ]] && id "$aur_user" >/dev/null 2>&1; then
+    userdel -r "$aur_user" >/dev/null 2>&1 || true
+  fi
+}
+
+prepare_aur_builder() {
+  if [[ ${EUID} -ne 0 ]]; then
+    return
+  fi
+  if ! command -v runuser >/dev/null 2>&1; then
+    log "O comando runuser e necessario para instalar pacotes AUR como root"
+    return 1
+  fi
+  if ! command -v sudo >/dev/null 2>&1; then
+    run_privileged pacman -S --needed --noconfirm sudo
+  fi
+  aur_user="dotfiles-aur-${BASHPID}"
+  trap cleanup_aur_builder EXIT
+  useradd --create-home --shell /bin/bash "$aur_user"
+  aur_sudoers=$(mktemp /etc/sudoers.d/setup-dev-env.XXXXXX)
+  printf '%s\n' "${aur_user} ALL=(root) NOPASSWD: /usr/bin/pacman" >"$aur_sudoers"
+  chmod 440 "$aur_sudoers"
+  if command -v visudo >/dev/null 2>&1; then
+    visudo -cf "$aur_sudoers" >/dev/null
+  fi
+}
+
+run_aur() {
+  if [[ ${EUID} -eq 0 ]]; then
+    runuser -u "$aur_user" -- "$@"
+  else
+    "$@"
+  fi
+}
 
 script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 compose_file="${script_dir}/pentest/docker-compose.yml"
 dockerfile="${script_dir}/pentest/Dockerfile"
+pentest_packages_file="${script_dir}/../packages/pentest-host.txt"
 zshrc_local="${HOME}/.zshrc.local"
 dotnet_path_line='export PATH="$HOME/.dotnet/tools:$PATH"'
 fnm_eval_line='eval "$(fnm env --use-on-cd --shell zsh)"'
@@ -43,7 +89,7 @@ ensure_pacman() {
     return
   fi
   log "Instalando ${pkg}"
-  sudo pacman -S --needed --noconfirm "$pkg"
+  run_privileged pacman -S --needed --noconfirm "$pkg"
 }
 
 aur_helper() {
@@ -74,8 +120,9 @@ ensure_aur() {
     log "paru/yay nao encontrado"
     return 1
   fi
+  prepare_aur_builder
   log "Instalando ${pkg} via ${helper}"
-  "$helper" -S --needed --noconfirm "$pkg"
+  run_aur "$helper" -S --needed --noconfirm "$pkg"
 }
 
 user_in_group() {
@@ -94,7 +141,7 @@ ensure_group() {
     return
   fi
   log "Adicionando ${USER} ao grupo ${group}"
-  sudo usermod -aG "$group" "$USER"
+  run_privileged usermod -aG "$group" "$USER"
   log "Grupo ${group} aplicado. Logout/login para valer na sessao atual"
 }
 
@@ -115,7 +162,7 @@ docker_exec() {
   if docker info &>/dev/null; then
     docker "$@"
   else
-    sudo docker "$@"
+    run_privileged docker "$@"
   fi
 }
 
@@ -126,7 +173,7 @@ compose_exec() {
     if docker info &>/dev/null; then
       docker-compose "$@"
     else
-      sudo docker-compose "$@"
+      run_privileged docker-compose "$@"
     fi
   else
     log "docker compose / docker-compose nao encontrado"
@@ -154,7 +201,7 @@ ensure_service() {
     return
   fi
   log "Habilitando e iniciando ${unit}"
-  sudo systemctl enable --now "$unit"
+  run_privileged systemctl enable --now "$unit"
 }
 
 ensure_docker_compose() {
@@ -174,7 +221,7 @@ ensure_docker_compose() {
 }
 
 ufw_defaults_ok() {
-  sudo ufw status verbose 2>/dev/null | grep -qiE 'Default: deny \(incoming\), allow \(outgoing\)'
+  run_privileged ufw status verbose 2>/dev/null | grep -qiE 'Default: deny \(incoming\), allow \(outgoing\)'
 }
 
 install_dotnet() {
@@ -281,10 +328,6 @@ install_docker() {
 
 install_pentest_isolated() {
   log "Iniciando install_pentest_isolated"
-  # Host: so diagnostico de rede. Ferramentas ofensivas ficam no container Kali isolado.
-  ensure_pacman nmap nmap
-  ensure_pacman wireshark-qt wireshark
-  ensure_group wireshark
 
   if [[ ! -f ${compose_file} ]]; then
     log "Arquivo ${compose_file} ausente"
@@ -308,8 +351,44 @@ install_pentest_isolated() {
   log "install_pentest_isolated concluido"
 }
 
+blackarch_repo_enabled() {
+  command -v pacman-conf >/dev/null 2>&1 &&
+    pacman-conf --repo-list 2>/dev/null | grep -Fxq blackarch
+}
+
+install_pentest_host() {
+  local packages
+  log "Iniciando install_pentest_host"
+
+  if [[ ! -f ${pentest_packages_file} ]]; then
+    log "Arquivo ${pentest_packages_file} ausente"
+    return 1
+  fi
+
+  if ! blackarch_repo_enabled; then
+    log "Repositorio BlackArch nao esta configurado no pacman"
+    log "Configure o repositorio oficial e execute este bloco novamente"
+    return 1
+  fi
+
+  mapfile -t packages < <(read_packages "$pentest_packages_file")
+  if (( ${#packages[@]} == 0 )); then
+    log "Nenhum pacote de pentest foi definido"
+    return 1
+  fi
+
+  if ! pacman -Si "${packages[@]}" >/dev/null 2>&1; then
+    log "Um ou mais pacotes de pentest nao estao disponiveis nos repositorios habilitados"
+    return 1
+  fi
+
+  run_privileged pacman -S --needed --noconfirm "${packages[@]}"
+  ensure_group wireshark
+  log "install_pentest_host concluido"
+}
+
 ufw_allows_ssh() {
-  sudo ufw status | grep -qE '22/tcp'
+  run_privileged ufw status | grep -qE '22/tcp'
 }
 
 install_hardening() {
@@ -322,26 +401,26 @@ install_hardening() {
     log "Pulando defaults UFW: ja estao deny incoming / allow outgoing"
   else
     log "Aplicando defaults do UFW sem reset (regras existentes sao preservadas)"
-    sudo ufw default deny incoming
-    sudo ufw default allow outgoing
+    run_privileged ufw default deny incoming
+    run_privileged ufw default allow outgoing
   fi
 
   if systemctl is-active --quiet sshd.service || systemctl is-active --quiet ssh.service; then
     if ufw_allows_ssh; then
       log "sshd ativo e 22/tcp ja liberado no UFW"
     elif confirm "sshd ativo. Liberar 22/tcp no UFW para evitar corte de SSH?"; then
-      sudo ufw allow 22/tcp
+      run_privileged ufw allow 22/tcp
       log "22/tcp liberado"
     else
       log "22/tcp nao liberado; deny incoming pode cortar SSH remoto"
     fi
   fi
 
-  if sudo ufw status | grep -qi 'Status: active'; then
+  if run_privileged ufw status | grep -qi 'Status: active'; then
     log "UFW ja ativo"
   else
     log "Ativando UFW"
-    sudo ufw --force enable
+    run_privileged ufw --force enable
   fi
   ensure_service ufw.service
 
@@ -355,7 +434,9 @@ install_hardening() {
 }
 
 main() {
-  sudo -v
+  if [[ ${EUID} -ne 0 ]]; then
+    sudo -v
+  fi
   log "Inicio do setup (idempotente; confirmação por bloco)"
 
   if confirm "Bloco 1 — .NET + Angular + Docker + SQL Server?"; then
@@ -366,16 +447,22 @@ main() {
     log "Bloco 1 ignorado"
   fi
 
-  if confirm "Bloco 2 — diagnostico de rede no host + lab Kali e alvos isolados?"; then
-    install_pentest_isolated
+  if confirm "Bloco 2 — ferramentas de pentest no host via BlackArch?"; then
+    install_pentest_host
   else
     log "Bloco 2 ignorado"
   fi
 
-  if confirm "Bloco 3 — hardening do host (UFW + fail2ban)?"; then
-    install_hardening
+  if confirm "Bloco 3 — lab web isolado com Kali e alvos vulneraveis?"; then
+    install_pentest_isolated
   else
     log "Bloco 3 ignorado"
+  fi
+
+  if confirm "Bloco 4 — hardening do host (UFW + fail2ban)?"; then
+    install_hardening
+  else
+    log "Bloco 4 ignorado"
   fi
 
   log "Setup concluido"
