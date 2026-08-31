@@ -35,7 +35,7 @@ prepare_aur_builder() {
   aur_user="dotfiles-aur-${BASHPID}"
   trap cleanup_aur_builder EXIT
   useradd --create-home --shell /bin/bash "$aur_user"
-  aur_sudoers=$(mktemp /etc/sudoers.d/setup-dev-env.XXXXXX)
+  aur_sudoers=$(mktemp /etc/sudoers.d/setup-dev-env-XXXXXX)
   printf '%s\n' "${aur_user} ALL=(root) NOPASSWD: /usr/bin/pacman" >"$aur_sudoers"
   chmod 440 "$aur_sudoers"
   if command -v visudo >/dev/null 2>&1; then
