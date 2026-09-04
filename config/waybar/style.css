@@ -88,11 +88,37 @@ window#waybar {
   color: @sapphire;
 }
 
+#custom-helvum,
+#custom-easyeffects,
+#pulseaudio,
+#backlight,
+#battery,
 #clock {
   transition: all 0.3s ease;
   font-weight: bold;
 }
 
+#custom-helvum:hover,
+#custom-easyeffects:hover,
+#pulseaudio:hover,
+#backlight:hover,
+#battery:hover,
 #clock:hover {
   color: @yellow;
+}
+
+#battery.warning {
+  color: @yellow;
+}
+
+#battery.critical {
+  color: @red;
+}
+
+#battery.charging {
+  color: @green;
+}
+
+#pulseaudio.muted {
+  color: @overlay0;
 }

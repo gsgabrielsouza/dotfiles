@@ -9,20 +9,24 @@
   "margin-left": 0,
   "margin-right": 0,
   "margin-bottom": 1,
-  "modules-left": ["custom/icon", "sway/window"],
+  "modules-left": ["custom/icon", "hyprland/window"],
   "modules-center": ["ext/workspaces"],
-  "modules-right": ["tray", "clock"],
+  "modules-right": ["tray", "custom/helvum", "custom/easyeffects", "pulseaudio", "backlight", "battery", "clock"],
   "custom/icon": {
     "format": ""
   },
-  "sway/window": {
+  "hyprland/window": {
     "separate-outputs": true,
     "format": "{class}",
     "rewrite": {
       "": "gs",
       "kitty": "Kel'thuzad",
       "foot": "Terminal",
-      "firefox": "Browser"
+      "firefox": "Browser",
+      "microsoft-edge": "Browser",
+      "cursor": "Editor",
+      "org.pipewire.Helvum": "Helvum",
+      "com.github.wwmm.easyeffects": "EasyEffects"
     }
   },
   "ext/workspaces": {
@@ -48,18 +52,58 @@
     "spacing": 5,
     "show-passive-items": true
   },
+  "custom/helvum": {
+    "format": "󰲁",
+    "tooltip-format": "Helvum",
+    "on-click": "helvum"
+  },
+  "custom/easyeffects": {
+    "format": "󰺢",
+    "tooltip-format": "EasyEffects",
+    "on-click": "easyeffects"
+  },
+  "pulseaudio": {
+    "format": "{icon} {volume}%",
+    "format-muted": "󰝟 {volume}%",
+    "format-bluetooth": "{icon} {volume}%",
+    "format-bluetooth-muted": "󰂲 {volume}%",
+    "format-icons": {
+      "headphone": "",
+      "headset": "",
+      "hands-free": "",
+      "default": ["", "", ""]
+    },
+    "scroll-step": 5,
+    "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+    "on-click-right": "easyeffects",
+    "on-click-middle": "helvum",
+    "tooltip-format": "{desc}\n{volume}%"
+  },
+  "backlight": {
+    "device": "intel_backlight",
+    "format": "{icon} {percent}%",
+    "format-icons": ["󰃝", "󰃞", "󰃟", "󰃠"],
+    "scroll-step": 5,
+    "tooltip-format": "Brilho: {percent}%"
+  },
+  "battery": {
+    "interval": 60,
+    "states": {
+      "warning": 30,
+      "critical": 15
+    },
+    "format": "{icon} {capacity}%",
+    "format-charging": "{icon} {capacity}%",
+    "format-plugged": "{icon} {capacity}%",
+    "format-icons": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+    "format-charging-icon": "󰂄",
+    "format-plugged-icon": "󰚥",
+    "tooltip-format": "{timeTo}"
+  },
   "clock": {
     "format": "<span></span>  {:%d/%m %H:%M}",
     "interval": 1,
-    "tooltip-format": "<tt>{calendar}</tt>",
-    "calendar": {
-      "format": {
-        "today": "<span color='#eed49f'><b>{}</b></span>"
-      }
-    },
-    "actions": {
-      "on-click-right": "shift_down",
-      "on-click": "shift_up"
-    }
+    "tooltip-format": "{:%A, %d de %B de %Y}",
+    "on-click": "/home/gs/.config/hypr/scripts/calendar.py"
   }
 }

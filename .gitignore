@@ -7,3 +7,5 @@ id_ed25519
 *.pem
 *.key
 .DS_Store
+__pycache__/
+*.pyc

@@ -73,7 +73,7 @@ read_packages() {
   grep -vE '^(#|[[:space:]]*$)' "$1"
 }
 
-link() {
+install() {
   local src=$1 dest=$2
   mkdir -p "$(dirname "$dest")"
   if [[ -L $dest ]]; then
@@ -81,7 +81,7 @@ link() {
   elif [[ -e $dest ]]; then
     mv "$dest" "${dest}.bak.$(date +%Y%m%d%H%M%S)"
   fi
-  ln -sfn "$src" "$dest"
+  cp -a "$src" "$dest"
 }
 
 run_privileged pacman -Syu --noconfirm
@@ -106,20 +106,38 @@ run_aur yay -S --needed --noconfirm "${aur[@]}"
 
 mkdir -p "$HOME/.config/sway/config.d"
 
-link "$dotfiles/config/sway/config" "$HOME/.config/sway/config"
-link "$dotfiles/config/waybar" "$HOME/.config/waybar"
-link "$dotfiles/config/foot" "$HOME/.config/foot"
-link "$dotfiles/config/starship.toml" "$HOME/.config/starship.toml"
-link "$dotfiles/home/.zshrc" "$HOME/.zshrc"
-link "$dotfiles/wallpapers" "$HOME/wallpapers"
+install "$dotfiles/config/sway/config" "$HOME/.config/sway/config"
+install "$dotfiles/config/waybar" "$HOME/.config/waybar"
+install "$dotfiles/config/foot" "$HOME/.config/foot"
+install "$dotfiles/config/starship.toml" "$HOME/.config/starship.toml"
+install "$dotfiles/config/hypr" "$HOME/.config/hypr"
+install "$dotfiles/config/kitty" "$HOME/.config/kitty"
+install "$dotfiles/config/uwsm" "$HOME/.config/uwsm"
+install "$dotfiles/config/btop/btop.conf" "$HOME/.config/btop/btop.conf"
+install "$dotfiles/config/htop" "$HOME/.config/htop"
+install "$dotfiles/config/autostart" "$HOME/.config/autostart"
+install "$dotfiles/config/systemd" "$HOME/.config/systemd"
+install "$dotfiles/config/mimeapps.list" "$HOME/.config/mimeapps.list"
+install "$dotfiles/config/dolphinrc" "$HOME/.config/dolphinrc"
+install "$dotfiles/config/easyeffects/easyeffectsrc" "$HOME/.config/easyeffectsrc"
+install "$dotfiles/home/.zshrc" "$HOME/.zshrc"
+install "$dotfiles/home/.zshrc.local" "$HOME/.zshrc.local"
+install "$dotfiles/home/.bashrc" "$HOME/.bashrc"
+install "$dotfiles/home/.bash_profile" "$HOME/.bash_profile"
+install "$dotfiles/home/.gitconfig" "$HOME/.gitconfig"
+install "$dotfiles/wallpapers" "$HOME/wallpapers"
+
+if [[ -d $HOME/.config/hypr/scripts ]]; then
+  chmod +x "$HOME/.config/hypr/scripts/"*.sh "$HOME/.config/hypr/scripts/"*.py 2>/dev/null || true
+fi
 
 if (( vm )); then
-  link "$dotfiles/vm/home/.zshenv" "$HOME/.zshenv"
-  link "$dotfiles/vm/home/.zprofile" "$HOME/.zprofile"
-  link "$dotfiles/vm/home/.zshrc.local" "$HOME/.zshrc.local"
+  install "$dotfiles/vm/home/.zshenv" "$HOME/.zshenv"
+  install "$dotfiles/vm/home/.zprofile" "$HOME/.zprofile"
+  install "$dotfiles/vm/home/.zshrc.local" "$HOME/.zshrc.local"
   mkdir -p "$HOME/.config/environment.d"
-  link "$dotfiles/vm/config/environment.d/sway-vbox.conf" "$HOME/.config/environment.d/sway-vbox.conf"
-  link "$dotfiles/vm/config/sway/config.d/output.conf" "$HOME/.config/sway/config.d/output.conf"
+  install "$dotfiles/vm/config/environment.d/sway-vbox.conf" "$HOME/.config/environment.d/sway-vbox.conf"
+  install "$dotfiles/vm/config/sway/config.d/output.conf" "$HOME/.config/sway/config.d/output.conf"
 fi
 
 run_privileged systemctl enable --now docker.service

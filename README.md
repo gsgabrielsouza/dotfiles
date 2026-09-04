@@ -15,7 +15,7 @@ chmod +x bootstrap.sh scripts/setup-dev-env.sh
 
 O bootstrap deixa o desktop e o Docker prontos. O `setup-dev-env.sh` e o segundo passo: toolchain .NET/Angular, pentest no host, lab isolado e hardening. Confirme cada bloco.
 
-Arquivos atuais em `~` e `~/.config` sao copiados para `*.bak.<timestamp>` antes do symlink, se nao forem links.
+Arquivos existentes em `~` e `~/.config` sao movidos para `*.bak.<timestamp>` antes da copia.
 
 ## O que o bootstrap faz
 

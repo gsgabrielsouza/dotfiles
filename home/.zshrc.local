@@ -1,0 +1,2 @@
+export PATH="$HOME/.dotnet/tools:$PATH"
+eval "$(fnm env --use-on-cd --shell zsh)"
