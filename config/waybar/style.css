@@ -90,6 +90,7 @@ window#waybar {
 
 #custom-helvum,
 #custom-easyeffects,
+#custom-weather,
 #pulseaudio,
 #backlight,
 #battery,
@@ -100,6 +101,7 @@ window#waybar {
 
 #custom-helvum:hover,
 #custom-easyeffects:hover,
+#custom-weather:hover,
 #pulseaudio:hover,
 #backlight:hover,
 #battery:hover,

@@ -115,21 +115,29 @@ install "$dotfiles/config/kitty" "$HOME/.config/kitty"
 install "$dotfiles/config/uwsm" "$HOME/.config/uwsm"
 install "$dotfiles/config/btop/btop.conf" "$HOME/.config/btop/btop.conf"
 install "$dotfiles/config/htop" "$HOME/.config/htop"
+install "$dotfiles/config/dunst" "$HOME/.config/dunst"
 install "$dotfiles/config/autostart" "$HOME/.config/autostart"
 install "$dotfiles/config/systemd" "$HOME/.config/systemd"
 install "$dotfiles/config/mimeapps.list" "$HOME/.config/mimeapps.list"
 install "$dotfiles/config/dolphinrc" "$HOME/.config/dolphinrc"
 install "$dotfiles/config/easyeffects/easyeffectsrc" "$HOME/.config/easyeffectsrc"
+install "$dotfiles/config/openfortivpn" "$HOME/.config/openfortivpn"
+install "$dotfiles/config/Cursor/User/settings.json" "$HOME/.config/Cursor/User/settings.json"
 install "$dotfiles/home/.zshrc" "$HOME/.zshrc"
 install "$dotfiles/home/.zshrc.local" "$HOME/.zshrc.local"
 install "$dotfiles/home/.bashrc" "$HOME/.bashrc"
 install "$dotfiles/home/.bash_profile" "$HOME/.bash_profile"
 install "$dotfiles/home/.gitconfig" "$HOME/.gitconfig"
 install "$dotfiles/wallpapers" "$HOME/wallpapers"
+install "$dotfiles/scripts/home/vpn-techne" "$HOME/scripts/vpn-techne"
 
 if [[ -d $HOME/.config/hypr/scripts ]]; then
   chmod +x "$HOME/.config/hypr/scripts/"*.sh "$HOME/.config/hypr/scripts/"*.py 2>/dev/null || true
 fi
+chmod +x "$HOME/scripts/vpn-techne" 2>/dev/null || true
+
+systemctl --user daemon-reload 2>/dev/null || true
+systemctl --user enable mount-windows.service 2>/dev/null || true
 
 if (( vm )); then
   install "$dotfiles/vm/home/.zshenv" "$HOME/.zshenv"

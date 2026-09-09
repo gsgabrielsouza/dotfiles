@@ -1,0 +1,129 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+HOST="vpn1-aws.techne.com.br"
+PORT="10443"
+SAML_PORT="8020"
+VPN_NAME="VPN TECHNE"
+
+if [[ -n ${SUDO_USER:-} ]]; then
+  USER_HOME=$(getent passwd "$SUDO_USER" | cut -d: -f6)
+else
+  USER_HOME="$HOME"
+fi
+CONF="${USER_HOME}/.config/openfortivpn/techne.conf"
+
+usage() {
+  echo "Uso: $(basename "$0") [connect|disconnect|status]"
+  echo "  connect       Conecta na ${VPN_NAME} (SAML no navegador)"
+  echo "  disconnect    Encerra o túnel"
+  echo "  status        Mostra se a VPN está ativa"
+}
+
+need_openfortivpn() {
+  if ! command -v openfortivpn >/dev/null 2>&1; then
+    echo "openfortivpn não está instalado."
+    echo "Instale com: sudo pacman -S openfortivpn"
+    exit 1
+  fi
+}
+
+ensure_conf() {
+  mkdir -p "$(dirname "$CONF")"
+  if [[ ! -f $CONF ]]; then
+    cat >"$CONF" <<EOF
+host = ${HOST}
+port = ${PORT}
+saml-login = ${SAML_PORT}
+set-dns = 1
+set-routes = 1
+EOF
+    if [[ -n ${SUDO_USER:-} ]]; then
+      chown "${SUDO_USER}:${SUDO_USER}" "$(dirname "$CONF")" "$CONF" 2>/dev/null || true
+    fi
+  fi
+}
+
+real_user() {
+  if [[ -n ${SUDO_USER:-} ]]; then
+    printf '%s\n' "$SUDO_USER"
+  else
+    printf '%s\n' "$USER"
+  fi
+}
+
+open_saml_browser() {
+  local url=$1
+  local user uid
+  user=$(real_user)
+  uid=$(id -u "$user")
+  sudo -u "$user" env \
+    DISPLAY="${DISPLAY:-:1}" \
+    WAYLAND_DISPLAY="${WAYLAND_DISPLAY:-wayland-1}" \
+    XDG_RUNTIME_DIR="/run/user/${uid}" \
+    DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${uid}/bus" \
+    BROWSER="${BROWSER:-microsoft-edge-stable}" \
+    xdg-open "$url" >/dev/null 2>&1 || true
+}
+
+cmd_status() {
+  if pgrep -f "openfortivpn ${HOST}" >/dev/null 2>&1; then
+    echo "${VPN_NAME}: conectada"
+    ip -br addr show ppp0 2>/dev/null || ip -br addr show tun0 2>/dev/null || true
+    return 0
+  fi
+  echo "${VPN_NAME}: desconectada"
+  return 1
+}
+
+cmd_disconnect() {
+  if ! pgrep -f "openfortivpn ${HOST}" >/dev/null 2>&1; then
+    echo "${VPN_NAME} já está desconectada."
+    return 0
+  fi
+  if [[ $EUID -ne 0 ]]; then
+    exec sudo "$0" disconnect
+  fi
+  pkill -f "openfortivpn ${HOST}" || true
+  echo "${VPN_NAME} desconectada."
+}
+
+cmd_connect() {
+  need_openfortivpn
+  ensure_conf
+  if pgrep -f "openfortivpn ${HOST}" >/dev/null 2>&1; then
+    echo "${VPN_NAME} já está conectada."
+    cmd_status || true
+    return 0
+  fi
+  if [[ $EUID -ne 0 ]]; then
+    exec sudo --preserve-env=DISPLAY,WAYLAND_DISPLAY,BROWSER "$0" connect
+  fi
+  echo "Conectando ${VPN_NAME} (${HOST}:${PORT})"
+  echo "O navegador vai abrir o login Microsoft. Conclua o SAML e volte ao terminal."
+  stdbuf -oL -eL openfortivpn "${HOST}:${PORT}" \
+    --config="$CONF" \
+    --saml-login="${SAML_PORT}" \
+    2>&1 | while IFS= read -r line; do
+      printf '%s\n' "$line"
+      if [[ $line == *"Authenticate at '"* ]]; then
+        url=${line#*Authenticate at \'}
+        url=${url%%\'*}
+        if [[ -n $url ]]; then
+          open_saml_browser "$url"
+        fi
+      fi
+    done
+}
+
+action=${1:-connect}
+case $action in
+  connect | c | up) cmd_connect ;;
+  disconnect | d | down) cmd_disconnect ;;
+  status | s) cmd_status ;;
+  -h | --help | help) usage ;;
+  *)
+    usage
+    exit 1
+    ;;
+esac

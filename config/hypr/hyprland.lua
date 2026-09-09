@@ -28,24 +28,33 @@ local terminal = "foot"
 local fileManager = "nemo"
 local menu = "wofi --show drun"
 local browser = "microsoft-edge-stable --ozone-platform-hint=auto"
-local waybar = os.getenv("HOME") .. "/.local/bin/waybar"
+local waybar = os.getenv("HOME") .. "/.config/hypr/scripts/start-waybar.sh"
 local wallpaperScript = os.getenv("HOME") .. "/.config/hypr/scripts/wallpaper.sh"
+local osdScript = os.getenv("HOME") .. "/.config/hypr/scripts/osd.sh"
 
 hl.exec_cmd('gsettings set org.gnome.desktop.interface gtk-theme "adw-gtk3-dark"')
 hl.exec_cmd('gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"')
-hl.exec_cmd("pgrep -x waybar >/dev/null || " .. waybar)
 hl.exec_cmd("pgrep -x hyprpaper >/dev/null || hyprpaper")
 hl.exec_cmd("pgrep -x hypridle >/dev/null || hypridle")
+hl.exec_cmd("pgrep -x dunst >/dev/null || dunst")
+hl.exec_cmd("pgrep -x gnome-keyring-d >/dev/null || gnome-keyring-daemon --start --components=pkcs11,secrets")
+hl.exec_cmd("pgrep -f polkit-kde-authentication-agent-1 >/dev/null || /usr/lib/polkit-kde-authentication-agent-1")
 hl.exec_cmd(wallpaperScript .. " daemon")
 
 hl.on("hyprland.start", function()
     hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP")
     hl.exec_cmd("pgrep -x hyprpaper >/dev/null || hyprpaper")
-    hl.exec_cmd(waybar)
     hl.exec_cmd("pgrep -x hypridle >/dev/null || hypridle")
+    hl.exec_cmd("systemctl --user restart dunst.service")
+    hl.timer(function()
+        hl.exec_cmd("pgrep -x waybar >/dev/null || " .. waybar)
+    end, { timeout = 400, type = "oneshot" })
     hl.exec_cmd(wallpaperScript .. " daemon")
     hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/clipboard-watch.sh")
     hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/bt-autoconnect.sh")
+    hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/mount-windows.sh")
+    hl.exec_cmd("pgrep -x gnome-keyring-d >/dev/null || gnome-keyring-daemon --start --components=pkcs11,secrets")
+    hl.exec_cmd("pgrep -f polkit-kde-authentication-agent-1 >/dev/null || /usr/lib/polkit-kde-authentication-agent-1")
 end)
 
 hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")
@@ -149,11 +158,79 @@ hl.workspace_rule({ workspace = "2", monitor = monitorL, persistent = true })
 hl.workspace_rule({ workspace = "3", monitor = monitorL, persistent = true })
 hl.workspace_rule({ workspace = "4", monitor = monitorL, persistent = true })
 hl.workspace_rule({ workspace = "5", monitor = monitorL, persistent = true })
-hl.workspace_rule({ workspace = "6", monitor = monitorR, default = true, persistent = true })
-hl.workspace_rule({ workspace = "7", monitor = monitorR, persistent = true })
-hl.workspace_rule({ workspace = "8", monitor = monitorR, persistent = true })
-hl.workspace_rule({ workspace = "9", monitor = monitorR, persistent = true })
-hl.workspace_rule({ workspace = "10", monitor = monitorR, persistent = true })
+
+local rightWsRules = {}
+for i = 6, 10 do
+    rightWsRules[i] = {
+        hdmi = hl.workspace_rule({
+            workspace = tostring(i),
+            monitor = monitorR,
+            persistent = true,
+            default = i == 6,
+            enabled = false,
+        }),
+        laptop = hl.workspace_rule({
+            workspace = tostring(i),
+            monitor = monitorL,
+            persistent = true,
+            enabled = false,
+        }),
+    }
+end
+
+local assignTimer = nil
+
+local function assignRightWorkspaces()
+    local hdmi = hl.get_monitor(monitorR) ~= nil
+    local target = hdmi and monitorR or monitorL
+    local focused = hl.get_active_monitor()
+    local focusedName = focused and focused.name or nil
+    local keepL = nil
+    local keepR = nil
+    local activeL = hl.get_active_workspace(monitorL)
+    if activeL then
+        keepL = activeL.id
+    end
+    if hdmi then
+        local activeR = hl.get_active_workspace(monitorR)
+        if activeR then
+            keepR = activeR.id
+        end
+    end
+
+    for i = 6, 10 do
+        local rules = rightWsRules[i]
+        rules.hdmi:set_enabled(hdmi)
+        rules.laptop:set_enabled(not hdmi)
+        hl.dispatch(hl.dsp.workspace.move({ workspace = i, monitor = target }))
+    end
+
+    if keepL then
+        hl.dispatch(hl.dsp.focus({ workspace = keepL }))
+    end
+    if keepR and hdmi then
+        hl.dispatch(hl.dsp.focus({ workspace = keepR }))
+    end
+    if focusedName and hl.get_monitor(focusedName) then
+        hl.dispatch(hl.dsp.focus({ monitor = focusedName }))
+    end
+end
+
+local function scheduleAssignRightWorkspaces()
+    if assignTimer then
+        assignTimer:set_enabled(false)
+    end
+    assignTimer = hl.timer(function()
+        assignRightWorkspaces()
+    end, { timeout = 250, type = "oneshot" })
+end
+
+scheduleAssignRightWorkspaces()
+hl.on("hyprland.start", scheduleAssignRightWorkspaces)
+hl.on("monitor.added", scheduleAssignRightWorkspaces)
+hl.on("monitor.removed", scheduleAssignRightWorkspaces)
+hl.on("monitor.layout_changed", scheduleAssignRightWorkspaces)
+hl.on("config.reloaded", scheduleAssignRightWorkspaces)
 
 hl.gesture({
     fingers = 3,
@@ -171,10 +248,9 @@ hl.bind(mainMod .. " + O", hl.dsp.exec_cmd(wallpaperScript .. " next"))
 -- hl.bind(mainMod .. " + SHIFT + O", hl.dsp.exec_cmd(wallpaperScript .. " prev"))
 hl.bind(mainMod .. " + P", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.window.close())
-hl.bind(mainMod .. " + C", hl.dsp.window.close())
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())
 hl.bind(mainMod .. " + SHIFT + SPACE", hl.dsp.window.float({ action = "toggle" }))
-hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
+hl.bind(mainMod .. " + V", hl.dsp.exec_cmd('cliphist list | wofi --dmenu --prompt clipboard | cliphist decode | wl-copy'))
 hl.bind(mainMod .. " + slash", hl.dsp.layout("togglesplit"))
 hl.bind(mainMod .. " + SHIFT + C", hl.dsp.exec_cmd("hyprctl reload"))
 hl.bind(mainMod .. " + SHIFT + E", hl.dsp.exit())
@@ -227,9 +303,21 @@ hl.define_submap("resize", function()
     hl.bind("Return", hl.dsp.submap("reset"))
 end)
 
+local function workspaceForSlot(slot)
+    local mon = hl.get_active_monitor()
+    if mon and mon.name == monitorR then
+        return slot + 5
+    end
+    return slot
+end
+
 for i = 1, 5 do
-    hl.bind(mainMod .. " + " .. i, hl.dsp.focus({ workspace = "m~" .. i }))
-    hl.bind(mainMod .. " + SHIFT + " .. i, hl.dsp.window.move({ workspace = "m~" .. i }))
+    hl.bind(mainMod .. " + " .. i, function()
+        hl.dispatch(hl.dsp.focus({ workspace = workspaceForSlot(i) }))
+    end)
+    hl.bind(mainMod .. " + SHIFT + " .. i, function()
+        hl.dispatch(hl.dsp.window.move({ workspace = workspaceForSlot(i) }))
+    end)
 end
 
 for i = 6, 10 do
@@ -239,8 +327,10 @@ for i = 6, 10 do
 end
 
 hl.bind(mainMod .. " + TAB", hl.dsp.exec_cmd("pgrep -x waybar >/dev/null && killall -SIGUSR1 waybar || " .. waybar), { release = true })
-hl.bind("PRINT", hl.dsp.exec_cmd('grim -g "$(slurp)" - | wl-copy'))
-hl.bind(mainMod .. " + PRINT", hl.dsp.exec_cmd('grim -g "$(slurp)"'))
+hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("dunstctl history-pop"))
+hl.bind(mainMod .. " + SHIFT + N", hl.dsp.exec_cmd("dunstctl close-all"))
+hl.bind("PRINT", hl.dsp.exec_cmd("hyprshot -m region --freeze --clipboard-only"))
+hl.bind(mainMod .. " + PRINT", hl.dsp.exec_cmd("hyprshot -m region --freeze -o " .. os.getenv("HOME") .. "/Pictures/Screenshots"))
 
 hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
 hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
@@ -253,17 +343,17 @@ local logitechVol = {
     repeating = true,
 }
 
-hl.bind("mouse:276", hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"), logitechVol)
-hl.bind("mouse:275", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"), logitechVol)
-hl.bind("mouse_right", hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"), logitechVol)
-hl.bind("mouse_left", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"), logitechVol)
+hl.bind("mouse:276", hl.dsp.exec_cmd(osdScript .. " volume-up"), logitechVol)
+hl.bind("mouse:275", hl.dsp.exec_cmd(osdScript .. " volume-down"), logitechVol)
+hl.bind("mouse_right", hl.dsp.exec_cmd(osdScript .. " volume-up"), logitechVol)
+hl.bind("mouse_left", hl.dsp.exec_cmd(osdScript .. " volume-down"), logitechVol)
 
-hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"), { locked = true, repeating = true })
-hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"), { locked = true, repeating = true })
-hl.bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"), { locked = true, repeating = true })
+hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd(osdScript .. " volume-up"), { locked = true, repeating = true })
+hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd(osdScript .. " volume-down"), { locked = true, repeating = true })
+hl.bind("XF86AudioMute", hl.dsp.exec_cmd(osdScript .. " volume-mute"), { locked = true, repeating = true })
 hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"), { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+"), { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%-"), { locked = true, repeating = true })
+hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd(osdScript .. " brightness-up"), { locked = true, repeating = true })
+hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd(osdScript .. " brightness-down"), { locked = true, repeating = true })
 
 hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"), { locked = true })
 hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })

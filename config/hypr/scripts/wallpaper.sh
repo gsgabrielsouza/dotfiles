@@ -2,16 +2,34 @@
 set -euo pipefail
 
 WALLPAPER_DIR="${WALLPAPER_DIR:-$HOME/wallpapers}"
+HYPRLAND_WALLPAPER_DIR="${HYPRLAND_WALLPAPER_DIR:-/usr/share/hypr}"
 INTERVAL="${INTERVAL:-300}"
 STATE_FILE="${XDG_RUNTIME_DIR:-/tmp}/wallpaper-index"
 FIT_MODE="cover"
 
 collect_wallpapers() {
-    find -L "$WALLPAPER_DIR" -maxdepth 1 -type f \( \
-        -iname '*.jpg' -o -iname '*.jpeg' -o \
-        -iname '*.png' -o -iname '*.webp' -o \
-        -iname '*.jxl' \
-    \) | sort
+    local dir file base resolved
+    local -A seen=()
+    local -a dirs=("$WALLPAPER_DIR" "$HOME/wallpaper" "$HYPRLAND_WALLPAPER_DIR")
+
+    for dir in "${dirs[@]}"; do
+        [[ -d "$dir" ]] || continue
+        resolved="$(readlink -f "$dir")"
+        [[ -n "${seen[$resolved]:-}" ]] && continue
+        seen[$resolved]=1
+
+        while IFS= read -r file; do
+            base="${file##*/}"
+            case "$base" in
+                lockdead*) continue ;;
+            esac
+            printf '%s\n' "$file"
+        done < <(find -L "$dir" -maxdepth 1 -type f \( \
+            -iname '*.jpg' -o -iname '*.jpeg' -o \
+            -iname '*.png' -o -iname '*.webp' -o \
+            -iname '*.jxl' \
+        \))
+    done | sort
 }
 
 apply_wallpaper() {

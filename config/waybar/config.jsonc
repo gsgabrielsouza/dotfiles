@@ -4,12 +4,12 @@
   "position": "top",
   "passthrough": false,
   "reload_style_on_change": true,
-  "spacing": 10,
+  "spacing": 8,
   "margin-top": 0,
   "margin-left": 0,
   "margin-right": 0,
   "margin-bottom": 1,
-  "modules-left": ["custom/icon", "hyprland/window"],
+  "modules-left": ["custom/icon", "hyprland/window", "custom/weather"],
   "modules-center": ["ext/workspaces"],
   "modules-right": ["tray", "custom/helvum", "custom/easyeffects", "pulseaudio", "backlight", "battery", "clock"],
   "custom/icon": {
@@ -20,7 +20,7 @@
     "format": "{class}",
     "rewrite": {
       "": "gs",
-      "kitty": "Kel'thuzad",
+      "kitty": "gs",
       "foot": "Terminal",
       "firefox": "Browser",
       "microsoft-edge": "Browser",
@@ -32,7 +32,9 @@
   "ext/workspaces": {
     "on-click": "activate",
     "all-outputs": false,
-    "sort-by-id": true,
+    "sort-by-id": false,
+    "sort-by-name": false,
+    "sort-by-coordinates": true,
     "format": "{icon}",
     "format-icons": {
       "1": "i",
@@ -40,17 +42,30 @@
       "3": "iii",
       "4": "iv",
       "5": "v",
-      "6": "i",
-      "7": "ii",
-      "8": "iii",
-      "9": "iv",
-      "10": "v"
+      "6": "vi",
+      "7": "vii",
+      "8": "viii",
+      "9": "ix",
+      "10": "x"
     }
   },
   "tray": {
     "icon-size": 16,
     "spacing": 5,
     "show-passive-items": true
+  },
+  "custom/weather": {
+    //"format-icons": ["󰖙", "󰖐", "󰖗", "󰖘", "󰖖"],
+    "exec": "curl -s 'https://wttr.in/Curitiba?format=%20%c%t%27%l'",
+    "interval": 1800,
+    "format": "{icon} {text}",
+    "format-icons": {
+    "clear": "󰖙",
+    "clouds": "󰖐",
+    "rain": "󰖗",
+    "snow": "󰖘",
+    "storm": "󰖖"
+  }
   },
   "custom/helvum": {
     "format": "󰲁",

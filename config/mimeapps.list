@@ -10,13 +10,14 @@ message/rfc822=userapp-Thunderbird-4LF9U3.desktop
 x-scheme-handler/feed=userapp-Thunderbird-RG49U3.desktop
 application/rss+xml=userapp-Thunderbird-RG49U3.desktop
 application/x-extension-rss=userapp-Thunderbird-RG49U3.desktop
-x-scheme-handler/webcal=userapp-Thunderbird-VZ6AV3.desktop
+x-scheme-handler/webcal=microsoft-edge.desktop
 x-scheme-handler/webcals=userapp-Thunderbird-VZ6AV3.desktop
 text/calendar=userapp-Thunderbird-VZ6AV3.desktop
 application/x-extension-ics=userapp-Thunderbird-VZ6AV3.desktop
 x-scheme-handler/net.thunderbird=userapp-Thunderbird-ZSQBV3.desktop
 x-scheme-handler/postman=Postman.desktop
 application/pdf=microsoft-edge.desktop
+x-scheme-handler/fabricagent=forticlient-register.desktop
 
 [Added Associations]
 x-scheme-handler/mailto=userapp-Thunderbird-4LF9U3.desktop;

@@ -2,8 +2,6 @@
 set -euo pipefail
 
 uuid=7A8E5C018E5BB3FB
-dev=/dev/disk/by-uuid/$uuid
-fstab_mp=/mnt/windows
 file_manager=nemo
 
 notify() {
@@ -41,24 +39,13 @@ find_source() {
   return 1
 }
 
-if [[ -z $(mountpoint_of) ]]; then
-  if [[ -d $fstab_mp ]] && grep -Fq "$uuid" /etc/fstab 2>/dev/null; then
-    mount "$fstab_mp" >/dev/null
-  elif command -v udisksctl >/dev/null; then
-    udisksctl mount -b "$dev" >/dev/null
-  else
-    notify "Partição Windows não montada. Configure o fstab no terminal."
-    exit 1
-  fi
-fi
+"${BASH_SOURCE[0]%/*}/mount-windows.sh"
 
 root=$(mountpoint_of)
 if [[ -z $root ]]; then
   notify "Partição Windows não montada. Configure o fstab no terminal."
   exit 1
 fi
-
-ln -sfn "$root" "$HOME/windows"
 
 target=$(find_source "$root" || true)
 if [[ -z ${target:-} ]]; then
