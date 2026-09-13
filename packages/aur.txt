@@ -1,4 +1,4 @@
 cursor-bin
 enpass-bin
 fnm-bin
-
+microsoft-edge-stable-bin

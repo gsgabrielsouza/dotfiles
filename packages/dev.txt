@@ -4,5 +4,3 @@ dotnet-runtime
 dotnet-sdk
 fail2ban
 fnm-bin
-nmap
-wireshark-qt

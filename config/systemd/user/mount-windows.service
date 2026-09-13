@@ -1,0 +1,11 @@
+[Unit]
+Description=Monta a particao Windows em /mnt/windows
+After=default.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/.config/hypr/scripts/mount-windows.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=default.target
