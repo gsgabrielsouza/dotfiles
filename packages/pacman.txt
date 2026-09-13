@@ -3,6 +3,7 @@ base-devel
 breeze-icons
 brightnessctl
 chromium
+cliphist
 docker
 dunst
 easyeffects
@@ -14,17 +15,20 @@ fzf
 git
 gnome-keyring
 grim
+gtk-layer-shell
 hypridle
 hyprland
 hyprlock
 hyprpaper
 hyprpicker
 hyprshot
+kitty
 kvantum
 libnotify
 mpv
 nano
 nemo
+nm-connection-editor
 noto-fonts
 openfortivpn
 pavucontrol
@@ -34,6 +38,7 @@ pipewire-pulse
 playerctl
 polkit-kde-agent
 power-profiles-daemon
+python-gobject
 qt5ct
 qt6ct
 slurp

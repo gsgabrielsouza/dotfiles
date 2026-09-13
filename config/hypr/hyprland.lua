@@ -52,6 +52,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd(wallpaperScript .. " daemon")
     hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/clipboard-watch.sh")
     hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/bt-autoconnect.sh")
+    hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/bt-audio-watch.sh")
     hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/mount-windows.sh")
     hl.exec_cmd("pgrep -x gnome-keyring-d >/dev/null || gnome-keyring-daemon --start --components=pkcs11,secrets")
     hl.exec_cmd("pgrep -f polkit-kde-authentication-agent-1 >/dev/null || /usr/lib/polkit-kde-authentication-agent-1")
@@ -70,8 +71,8 @@ hl.config({
         no_hardware_cursors = true,
     },
     general = {
-        gaps_in = 1.5,
-        gaps_out = 1.5,
+        gaps_in = 1,
+        gaps_out = 1,
         border_size = 1,
         col = {
             inactive_border = "rgba(" .. c.sapphire .. "4d)",
@@ -83,12 +84,12 @@ hl.config({
         extend_border_grab_area = 15,
     },
     decoration = {
-        rounding = 1,
-        rounding_power = 4,
+        rounding = 5,
+        rounding_power = 5,
         active_opacity = 1,
-        inactive_opacity = 0.8,
+        inactive_opacity = 0.9,
         shadow = {
-            enabled = false,
+            enabled = true,
         },
         blur = {
             enabled = true,
@@ -109,7 +110,7 @@ hl.config({
     },
     misc = {
         force_default_wallpaper = 0,
-        disable_hyprland_logo = true,
+        disable_hyprland_logo = false,
         animate_manual_resizes = true,
         mouse_move_enables_dpms = true,
         key_press_enables_dpms = true,
@@ -247,7 +248,8 @@ hl.bind(mainMod .. " + W", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/s
 hl.bind(mainMod .. " + O", hl.dsp.exec_cmd(wallpaperScript .. " next"))
 -- hl.bind(mainMod .. " + SHIFT + O", hl.dsp.exec_cmd(wallpaperScript .. " prev"))
 hl.bind(mainMod .. " + P", hl.dsp.exec_cmd(menu))
-hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.window.close())
+-- hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.window.close())
+hl.bind(mainMod .. " + Q", hl.dsp.window.close())
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())
 hl.bind(mainMod .. " + SHIFT + SPACE", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + V", hl.dsp.exec_cmd('cliphist list | wofi --dmenu --prompt clipboard | cliphist decode | wl-copy'))
@@ -391,4 +393,11 @@ hl.window_rule({
         pin = false,
     },
     no_focus = true,
+})
+
+hl.layer_rule({
+    name = "wofi-blur",
+    match = { namespace = "^wofi$" },
+    blur = true,
+    ignore_alpha = 0.2,
 })

@@ -12,9 +12,23 @@ osd() {
         "${icon}  ${value}%"
 }
 
+volume_id() {
+    local id
+    id="$(wpctl status 2>/dev/null | awk '/Sinks:/,/Sources:/' | sed -n 's/.*[^0-9]\([0-9][0-9]*\)\. EDIFIER.*/\1/p' | head -n1)"
+    if [[ -z "$id" ]]; then
+        id="$(wpctl status 2>/dev/null | awk '/Sinks:/,/Sources:/' | sed -n 's/.*[^0-9]\([0-9][0-9]*\)\. .*Speaker.*/\1/p' | head -n1)"
+    fi
+    if [[ -n "$id" ]]; then
+        printf '%s\n' "$id"
+    else
+        printf '%s\n' '@DEFAULT_AUDIO_SINK@'
+    fi
+}
+
 volume_osd() {
+    local id="$1"
     local line value muted=0 icon
-    line="$(wpctl get-volume @DEFAULT_AUDIO_SINK@)"
+    line="$(wpctl get-volume "$id")"
     value="$(awk '{printf "%d", $2 * 100 + 0.5}' <<<"$line")"
     [[ "$line" == *MUTED* ]] && muted=1
     if ((muted == 1)); then
@@ -37,16 +51,19 @@ brightness_osd() {
 
 case "${1:-}" in
     volume-up)
-        wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+
-        volume_osd
+        id="$(volume_id)"
+        wpctl set-volume -l 1 "$id" 5%+
+        volume_osd "$id"
         ;;
     volume-down)
-        wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
-        volume_osd
+        id="$(volume_id)"
+        wpctl set-volume "$id" 5%-
+        volume_osd "$id"
         ;;
     volume-mute)
-        wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
-        volume_osd
+        id="$(volume_id)"
+        wpctl set-mute "$id" toggle
+        volume_osd "$id"
         ;;
     brightness-up)
         brightnessctl -e4 -n2 set 5%+ >/dev/null

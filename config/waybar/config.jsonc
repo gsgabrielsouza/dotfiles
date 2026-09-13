@@ -4,14 +4,27 @@
   "position": "top",
   "passthrough": false,
   "reload_style_on_change": true,
-  "spacing": 8,
+  "spacing": 10,
   "margin-top": 0,
   "margin-left": 0,
   "margin-right": 0,
   "margin-bottom": 1,
   "modules-left": ["custom/icon", "hyprland/window", "custom/weather"],
   "modules-center": ["ext/workspaces"],
-  "modules-right": ["tray", "custom/helvum", "custom/easyeffects", "pulseaudio", "backlight", "battery", "clock"],
+  "modules-right": [
+    "tray",
+   // "custom/helvum",
+   // "custom/easyeffects",
+   "memory",
+   "cpu",
+   "network",
+   "pulseaudio",
+    "backlight",
+    "battery",
+    "clock",
+    // "custom/icon",
+    "custom/power"
+  ],
   "custom/icon": {
     "format": ""
   },
@@ -67,16 +80,16 @@
     "storm": "󰖖"
   }
   },
-  "custom/helvum": {
-    "format": "󰲁",
-    "tooltip-format": "Helvum",
-    "on-click": "helvum"
-  },
-  "custom/easyeffects": {
-    "format": "󰺢",
-    "tooltip-format": "EasyEffects",
-    "on-click": "easyeffects"
-  },
+  // "custom/helvum": {
+  //   "format": "󰲁",
+  //   "tooltip-format": "Helvum",
+  //   "on-click": "helvum"
+  // },
+  // "custom/easyeffects": {
+  //   "format": "󰺢",
+  //   "tooltip-format": "EasyEffects",
+  //   "on-click": "easyeffects"
+  // },
   "pulseaudio": {
     "format": "{icon} {volume}%",
     "format-muted": "󰝟 {volume}%",
@@ -101,6 +114,31 @@
     "scroll-step": 5,
     "tooltip-format": "Brilho: {percent}%"
   },
+  "memory": {
+    // "format": "󰍻 {used:0.1f} / {total:0.1f} GiB", 
+    "format": "󰍻 {percentage}%",
+    "tooltip-format": "Memória: {percentage}% · {used:0.1f} / {total:0.1f} GiB",
+    "interval": 1
+  },
+  "cpu": {
+    "format": "󰍛 {usage}%",
+    "tooltip-format": "CPU: {usage}%",
+    "interval": 1,
+    "on-click": "cpu"
+  },
+  "network": {
+    "format": "{ifname}",
+    "format-wifi": "{icon} {bandwidthDownBytes}",
+    "format-ethernet": "󰈀 {bandwidthDownBytes}",
+    "format-disconnected": "󰌙",
+    "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
+    "tooltip-format-wifi": "{essid} ({signalStrength}%)\n{ipaddr}\n↓ {bandwidthDownBytes}  ↑ {bandwidthUpBytes}",
+    "tooltip-format-ethernet": "{ifname} {ipaddr}\n↓ {bandwidthDownBytes}  ↑ {bandwidthUpBytes}",
+    "tooltip-format-disconnected": "Desconectado",
+    "on-click": "$HOME/.config/hypr/scripts/wifi-menu.py",
+    "on-click-right": "nm-connection-editor",
+    "interval": 5
+  },
   "battery": {
     "interval": 60,
     "states": {
@@ -119,6 +157,18 @@
     "format": "<span></span>  {:%d/%m %H:%M}",
     "interval": 1,
     "tooltip-format": "{:%A, %d de %B de %Y}",
-    "on-click": "/home/gs/.config/hypr/scripts/calendar.py"
+    "on-click": "$HOME/.config/hypr/scripts/calendar.py"
+  },
+  "custom/power": {
+    "format": "󰐥",
+    "tooltip": false,
+    "menu": "on-click",
+    "menu-file": "$HOME/.config/waybar/power_menu.xml",
+    "menu-actions": {
+      "shutdown": "systemctl poweroff",
+      "reboot": "systemctl reboot",
+      "suspend": "systemctl suspend",
+      "logout": "hyprctl dispatch exit"
+    }
   }
 }

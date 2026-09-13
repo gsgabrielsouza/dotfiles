@@ -10,3 +10,6 @@ while read -r _ mac _; do
   [[ $connected == yes ]] && continue
   bluetoothctl connect "$mac" >/dev/null 2>&1 || true
 done < <(bluetoothctl devices Paired 2>/dev/null || true)
+
+sleep 2
+"${HOME}/.config/hypr/scripts/bt-audio-route.sh" || true
