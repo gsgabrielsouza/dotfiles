@@ -77,6 +77,10 @@ cmd_exists() {
   command -v "$1" >/dev/null 2>&1
 }
 
+read_packages() {
+  grep -vE '^(#|[[:space:]]*$)' "$1"
+}
+
 ensure_pacman() {
   local pkg=$1
   local bin=${2:-}

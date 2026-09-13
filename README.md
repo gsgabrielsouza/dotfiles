@@ -1,6 +1,8 @@
-# Dotfiles Arch + Sway
+# Dotfiles Arch + Hyprland
 
-Replica o ambiente atual (Sway, Waybar, Foot, Zsh, Starship) **depois** do `archinstall` (profile minimal, Pipewire, NetworkManager).
+Replica o ambiente atual (Hyprland, Waybar, Foot, Kitty, Zsh, Starship) **depois** do `archinstall` (profile minimal, Pipewire, NetworkManager). Sway continua instalado como sessao alternativa.
+
+Monitores, particao Windows e VPN neste repo sao da maquina atual. Ajuste `config/hypr/hyprland.lua`, `config/hypr/scripts/mount-windows.sh` e `scripts/home/vpn-techne` antes de usar em outro hardware.
 
 ## Uso
 
@@ -9,7 +11,7 @@ git clone git@github.com:gsgabrielsouza/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 chmod +x bootstrap.sh scripts/setup-dev-env.sh
 ./bootstrap.sh          # maquina fisica
-./bootstrap.sh --vm     # VirtualBox (cursores, pixman, guest utils, output Virtual-1)
+./bootstrap.sh --vm     # VirtualBox (guest utils, output Virtual-1)
 ./scripts/setup-dev-env.sh
 ```
 
@@ -17,13 +19,24 @@ O bootstrap deixa o desktop e o Docker prontos. O `setup-dev-env.sh` e o segundo
 
 Arquivos existentes em `~` e `~/.config` sao movidos para `*.bak.<timestamp>` antes da copia.
 
+## Desktop
+
+- **Hyprland** (Lua) + **UWSM**, lock/idle/wallpaper via hyprlock, hypridle e hyprpaper
+- **Waybar**: workspaces, janela, clima, CPU/RAM, rede (menu Wi-Fi), audio, brilho, bateria, relogio e powermenu
+- Terminais **Foot** (Super+Return) e **Kitty**; launcher **Wofi**; arquivos **Nemo**
+- Tema Catppuccin Macchiato, teclado `br-abnt2`
+- Notebook `eDP-1` @ 120 Hz; HDMI em cima; DP a direita. Workspaces 1–5 no laptop; 6–10 no HDMI quando conectado
+- Browser da sessao: Edge (`Super+B`). O bootstrap ainda define Firefox como padrao xdg
+- Scripts em [`config/hypr/scripts`](config/hypr/scripts): wallpaper, OSD, clipboard, Bluetooth, Wi-Fi, calendario, montagem do Windows, Waybar
+
 ## O que o bootstrap faz
 
-- instala pacotes oficiais e AUR (`cursor-bin`, `enpass-bin`, `fnm-bin`)
-- liga configs e wallpapers
-- ativa Docker (grupo `docker`), UFW e power-profiles-daemon
-- com `--vm`: `virtualbox-guest-utils` + `vboxservice`
-- define zsh como shell e Firefox como navegador padrao
+- instala pacotes oficiais ([`packages/pacman.txt`](packages/pacman.txt)) e AUR (`cursor-bin`, `enpass-bin`, `fnm-bin`, `microsoft-edge-stable-bin`)
+- copia configs (Hyprland, Sway, Waybar, Foot, Kitty, UWSM, dunst, btop, htop, EasyEffects, Cursor, openfortivpn) e wallpapers
+- instala `~/scripts/vpn-techne` (`connect` / `disconnect` / `status`, SAML no navegador)
+- habilita Docker (grupo `docker`), UFW, power-profiles-daemon e `mount-windows.service`
+- com `--vm`: `virtualbox-guest-utils` + `vboxservice` e overlays em `vm/`
+- define zsh como shell e Firefox como navegador xdg padrao
 
 ## O que o setup-dev-env faz
 
@@ -79,8 +92,24 @@ Para desativar o repositorio, remova ou desabilite a secao `[blackarch]` e seu s
 pacman-conf --repo-list
 ```
 
+## Atalhos (Hyprland)
+
+| Atalho | Acao |
+|--------|------|
+| Super+Return | Foot |
+| Super+B | Edge |
+| Super+E | Nemo |
+| Super+P | Wofi |
+| Super+O | proximo wallpaper |
+| Super+V | clipboard (cliphist) |
+| Super+W | lista de janelas |
+| Super+L | hyprlock |
+| Super+Q | fecha janela |
+| Super+F | fullscreen |
+| Super+Shift+E | sai da sessao |
+
 ## Fora dos scripts
 
-- particao/disco, usuario, locale e bootloader no `archinstall`
-- `git config --global user.name` / `user.email`
+- particao/disco, usuario, locale, bootloader e display manager no `archinstall`
+- entrada da particao Windows no `/etc/fstab` (UUID da maquina atual) e Inicializacao Rapida desligada no Windows
 - Shared Folder do VirtualBox (`vboxsf`), se precisar
