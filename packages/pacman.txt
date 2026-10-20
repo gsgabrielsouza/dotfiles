@@ -94,3 +94,4 @@ zsh-syntax-highlighting
 sddm
 xorg-server
 dbeaver
+jdk11-openjdk

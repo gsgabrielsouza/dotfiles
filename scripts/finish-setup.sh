@@ -19,8 +19,9 @@ log() {
 
 sudo -v
 
-log "Pacotes: SDDM, Xorg (greeter), NVIDIA, fail2ban"
-sudo pacman -S --needed --noconfirm sddm xorg-server nvidia-open nvidia-utils fail2ban dbeaver
+log "Pacotes: SDDM, Xorg (greeter), NVIDIA, fail2ban, DBeaver, Java 11, flyctl"
+sudo pacman -S --needed --noconfirm sddm xorg-server nvidia-open nvidia-utils fail2ban dbeaver jdk11-openjdk
+yay -S --needed --noconfirm flyctl-bin
 
 log "Tela de login (SDDM) e nvidia-drm"
 sudo bash "$dotfiles/config/hypr/scripts/fix-sddm-boot.sh"
@@ -42,8 +43,7 @@ sudo systemctl enable --now docker.service
 if sudo docker ps -a --format '{{.Names}}' | grep -Fxq "$container"; then
   printf '%s\n' "Container ${container} ja existe"
   sudo docker start "$container" >/dev/null
-  read -r -s -p "Senha do SA do container existente: " pass
-  printf '\n'
+  pass=$(sudo docker inspect "$container" --format '{{range .Config.Env}}{{println .}}{{end}}' | sed -n 's/^MSSQL_SA_PASSWORD=//p')
 else
   while true; do
     read -r -s -p "Nova senha do SA (8+ chars, maiuscula, minuscula, numero e simbolo): " pass
@@ -90,6 +90,7 @@ else
   log "Restaurando cronosLocal"
   sudo docker exec "$container" mkdir -p /var/opt/mssql/backup
   sudo docker cp "$bak" "${container}:/var/opt/mssql/backup/cronosLocal.bak"
+  sudo docker exec -u 0 "$container" chown mssql:mssql /var/opt/mssql/backup/cronosLocal.bak
   moves=$(run_sql -h -1 -W -s '|' -Q "SET NOCOUNT ON; RESTORE FILELISTONLY FROM DISK = N'/var/opt/mssql/backup/cronosLocal.bak'" |
     awk -F'|' 'NF > 3 {
       ext = ($3 == "L") ? "ldf" : "mdf"
