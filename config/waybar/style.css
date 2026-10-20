@@ -26,15 +26,16 @@
 @define-color crust #181926;
 
 * {
-  font-family: "JetBrains Mono Nerd", monospace;
+  font-family: "JetBrainsMono Nerd Font", monospace;
   border: none;
   min-height: 0;
 }
 
 window#waybar {
-  background-color: alpha(@base, 0.75);
+  background-color: alpha(@base, 0.92);
+  border-bottom: 2px solid alpha(@blue, 0.6);
   border-radius: 0;
-  color: @sapphire;
+  color: @text;
   padding: 2px 12px;
   transition: 0.3s all;
 }
@@ -43,7 +44,7 @@ window#waybar {
 .modules-center,
 .modules-right {
   padding: 0 1rem;
-  color: @sapphire;
+  color: @text;
   border: none;
 }
 
@@ -58,7 +59,7 @@ window#waybar {
 
 #window {
   font-weight: bold;
-  color: @sky;
+  color: @blue;
   transition: all 0.3s ease;
 }
 
@@ -80,11 +81,12 @@ window#waybar {
 #custom-ws10 {
   font-weight: bold;
   font-size: 12px;
-  color: @sapphire;
-  border-radius: 0;
+  color: @subtext0;
+  border-radius: 6px;
   transition: 0.2s ease-out;
-  border-bottom: 1px solid transparent;
-  padding: 0 4px;
+  border-bottom: 2px solid transparent;
+  margin: 2px 1px;
+  padding: 0 6px;
 }
 
 #custom-ws1.empty,
@@ -110,8 +112,8 @@ window#waybar {
 #custom-ws8.occupied,
 #custom-ws9.occupied,
 #custom-ws10.occupied {
-  color: @sky;
-  border-bottom: 1px solid @sapphire;
+  color: @text;
+  border-bottom: 2px solid @surface2;
 }
 
 #custom-ws1.active,
@@ -124,8 +126,9 @@ window#waybar {
 #custom-ws8.active,
 #custom-ws9.active,
 #custom-ws10.active {
-  color: @yellow;
-  border-bottom: 1px solid @yellow;
+  color: @crust;
+  background-color: @blue;
+  border-bottom: 2px solid @lavender;
 }
 
 #custom-ws1.hidden,
@@ -147,7 +150,7 @@ window#waybar {
 }
 
 #tray {
-  color: @sapphire;
+  color: @text;
 }
 
 #custom-helvum,
@@ -180,7 +183,7 @@ window#waybar {
 #backlight:hover,
 #battery:hover,
 #clock:hover {
-  color: @yellow;
+  color: @blue;
 }
 
 #mpris.paused {
@@ -214,24 +217,26 @@ window#waybar {
 }
 
 #bluetooth.connected {
-  color: @sapphire;
+  color: @blue;
 }
 
 menu {
   font-family: "JetBrainsMono Nerd Font";
   background: @base;
   color: @text;
-  border: 1px solid @surface1;
+  border: 2px solid @blue;
+  border-radius: 10px;
   padding: 4px;
 }
 
 menuitem {
   font-family: "JetBrainsMono Nerd Font";
   padding: 4px 10px;
+  border-radius: 6px;
   color: @text;
 }
 
 menuitem:hover {
   background: @surface0;
-  color: @yellow;
+  color: @blue;
 }
