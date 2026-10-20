@@ -46,7 +46,6 @@ noto-fonts-extra
 ntfs-3g
 obsidian
 obs-studio
-openfortivpn
 pacman-contrib
 pavucontrol
 pipewire

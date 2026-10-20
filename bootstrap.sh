@@ -121,7 +121,6 @@ install "$dotfiles/config/systemd" "$HOME/.config/systemd"
 install "$dotfiles/config/mimeapps.list" "$HOME/.config/mimeapps.list"
 install "$dotfiles/config/dolphinrc" "$HOME/.config/dolphinrc"
 install "$dotfiles/config/easyeffects/easyeffectsrc" "$HOME/.config/easyeffectsrc"
-install "$dotfiles/config/openfortivpn" "$HOME/.config/openfortivpn"
 install "$dotfiles/config/Cursor/User/settings.json" "$HOME/.config/Cursor/User/settings.json"
 install "$dotfiles/home/.zshrc" "$HOME/.zshrc"
 install "$dotfiles/home/.zshrc.local" "$HOME/.zshrc.local"
@@ -130,6 +129,14 @@ install "$dotfiles/home/.bash_profile" "$HOME/.bash_profile"
 install "$dotfiles/home/.gitconfig" "$HOME/.gitconfig"
 install "$dotfiles/wallpapers" "$HOME/wallpapers"
 install "$dotfiles/scripts/home/vpn-techne" "$HOME/scripts/vpn-techne"
+
+autoscroll_dir="$HOME/.local/src/hypr-autoscroll"
+if [[ ! -d $autoscroll_dir/.git ]]; then
+  git clone https://github.com/estebanhiram/hypr-autoscroll.git "$autoscroll_dir"
+fi
+if ! make -C "$autoscroll_dir"; then
+  printf '%s\n' "Falha ao compilar o hypr-autoscroll; o Hyprland sobe sem o plugin." >&2
+fi
 
 if [[ -d $HOME/.config/hypr/scripts ]]; then
   chmod +x "$HOME/.config/hypr/scripts/"*.sh "$HOME/.config/hypr/scripts/"*.py 2>/dev/null || true

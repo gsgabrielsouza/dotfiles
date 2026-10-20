@@ -22,18 +22,21 @@ Arquivos existentes em `~` e `~/.config` sao movidos para `*.bak.<timestamp>` an
 ## Desktop
 
 - **Hyprland** (Lua) + **UWSM**, lock/idle/wallpaper via hyprlock, hypridle e hyprpaper
-- **Waybar**: workspaces, janela, clima, CPU/RAM, rede (menu Wi-Fi), audio, brilho, bateria, relogio e powermenu
+- **Waybar**: workspaces (scripts proprios), janela, clima, player (mpris), CPU/RAM, rede (menu Wi-Fi), Bluetooth, audio, brilho, bateria, relogio e powermenu
 - Terminais **Foot** (Super+Return) e **Kitty**; launcher **Wofi**; arquivos **Nemo**
 - Tema Catppuccin Macchiato, teclado `br-abnt2`
-- Notebook `eDP-1` @ 120 Hz; HDMI em cima; DP a direita. Workspaces 1–5 no laptop; 6–10 no HDMI quando conectado
+- Notebook `eDP-1` @ 120 Hz; HDMI em cima. Workspaces 1–5 no laptop; 6–10 no HDMI quando conectado
 - Browser da sessao: Edge (`Super+B`). O bootstrap ainda define Firefox como padrao xdg
-- Scripts em [`config/hypr/scripts`](config/hypr/scripts): wallpaper, OSD, clipboard, Bluetooth, Wi-Fi, calendario, montagem do Windows, Waybar
+- Scripts em [`config/hypr/scripts`](config/hypr/scripts): wallpaper, OSD, clipboard, Bluetooth (menu e roteamento de audio), Wi-Fi, calendario, montagem do Windows, Waybar
+- Plugin [hypr-autoscroll](https://github.com/estebanhiram/hypr-autoscroll) (autoscroll com botao do meio; `Super+A` liga/desliga), compilado em `~/.local/src/hypr-autoscroll`. O plugin depende da ABI do Hyprland: apos atualizar o Hyprland, rode `make -C ~/.local/src/hypr-autoscroll clean all`
+- VPN via **FortiClient** (tray iniciado com a sessao)
 
 ## O que o bootstrap faz
 
-- instala pacotes oficiais ([`packages/pacman.txt`](packages/pacman.txt)) e AUR (`cursor-bin`, `enpass-bin`, `fnm-bin`, `microsoft-edge-stable-bin`)
-- copia configs (Hyprland, Sway, Waybar, Foot, Kitty, UWSM, dunst, btop, htop, EasyEffects, Cursor, openfortivpn) e wallpapers
-- instala `~/scripts/vpn-techne` (`connect` / `disconnect` / `status`, SAML no navegador)
+- instala pacotes oficiais ([`packages/pacman.txt`](packages/pacman.txt)) e AUR ([`packages/aur.txt`](packages/aur.txt): Cursor, Enpass, fnm, Edge, Chrome, FortiClient VPN, Postman, Claude Desktop)
+- copia configs (Hyprland, Sway, Waybar, Foot, Kitty, UWSM, dunst, btop, htop, EasyEffects, Cursor) e wallpapers
+- compila o plugin hypr-autoscroll (falha nao interrompe o bootstrap)
+- instala `~/scripts/vpn-techne` (`connect` / `disconnect` / `status`, SAML no FortiClient)
 - habilita Docker (grupo `docker`), UFW, power-profiles-daemon e `mount-windows.service`
 - com `--vm`: `virtualbox-guest-utils` + `vboxservice` e overlays em `vm/`
 - define zsh como shell e Firefox como navegador xdg padrao
@@ -100,6 +103,8 @@ pacman-conf --repo-list
 | Super+B | Edge |
 | Super+E | Nemo |
 | Super+P | Wofi |
+| Super+S | Spotify |
+| Super+A | liga/desliga autoscroll |
 | Super+O | proximo wallpaper |
 | Super+V | clipboard (cliphist) |
 | Super+W | lista de janelas |
