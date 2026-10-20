@@ -33,3 +33,7 @@ alias usar-java-8='export JAVA_HOME="$HOME/.local/jvm/java-8-oracle-amd64"; expo
 
 alias usar-java-11='export JAVA_HOME="/usr/lib/jvm/java-11-openjdk"; export PATH="$JAVA_HOME/bin:$PATH"; java -version'
 setopt interactive_comments
+
+# Added by flyctl installer
+export FLYCTL_INSTALL="/home/gs/.fly"
+export PATH="$FLYCTL_INSTALL/bin:$PATH"

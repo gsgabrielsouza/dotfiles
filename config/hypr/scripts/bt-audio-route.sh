@@ -52,6 +52,11 @@ fi
 link_ee_to_sink "$hardware"
 pactl set-sink-mute "$hardware" 0 >/dev/null 2>&1 || true
 pactl set-default-sink "$hardware" >/dev/null 2>&1 || true
+pactl list short sink-inputs 2>/dev/null | while read -r id _ sink _; do
+  [[ -n "$id" ]] || continue
+  [[ "$sink" == "$hardware" || "$sink" == "easyeffects_sink" ]] && continue
+  pactl move-sink-input "$id" "$hardware" >/dev/null 2>&1 || true
+done
 
 if [[ -n "$bt" && -n "$speaker" ]]; then
   pactl set-sink-mute "$speaker" 1 >/dev/null 2>&1 || true

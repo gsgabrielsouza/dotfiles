@@ -17,17 +17,11 @@ hl.monitor({
     scale = 1,
 })
 
-hl.monitor({
-    output = "DP-1",
-    mode = "preferred",
-    position = "auto-right",
-    scale = 1,
-})
 
 local terminal = "foot"
 local fileManager = "nemo"
 local menu = "wofi --show drun"
-local browser = "microsoft-edge-stable --ozone-platform-hint=auto"
+local browser = "microsoft-edge-stable"
 local waybar = os.getenv("HOME") .. "/.config/hypr/scripts/start-waybar.sh"
 local wallpaperScript = os.getenv("HOME") .. "/.config/hypr/scripts/wallpaper.sh"
 local osdScript = os.getenv("HOME") .. "/.config/hypr/scripts/osd.sh"
@@ -38,11 +32,13 @@ hl.exec_cmd("pgrep -x hyprpaper >/dev/null || hyprpaper")
 hl.exec_cmd("pgrep -x hypridle >/dev/null || hypridle")
 hl.exec_cmd("pgrep -x dunst >/dev/null || dunst")
 hl.exec_cmd("pgrep -x gnome-keyring-d >/dev/null || gnome-keyring-daemon --start --components=pkcs11,secrets")
-hl.exec_cmd("pgrep -f polkit-kde-authentication-agent-1 >/dev/null || /usr/lib/polkit-kde-authentication-agent-1")
+hl.exec_cmd("systemctl --user start plasma-polkit-agent.service")
 hl.exec_cmd(wallpaperScript .. " daemon")
 
+
 hl.on("hyprland.start", function()
-    hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP")
+    hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE")
+    hl.exec_cmd("systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE QT_QPA_PLATFORM DISPLAY")
     hl.exec_cmd("pgrep -x hyprpaper >/dev/null || hyprpaper")
     hl.exec_cmd("pgrep -x hypridle >/dev/null || hypridle")
     hl.exec_cmd("systemctl --user restart dunst.service")
@@ -55,7 +51,17 @@ hl.on("hyprland.start", function()
     hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/bt-audio-watch.sh")
     hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/mount-windows.sh")
     hl.exec_cmd("pgrep -x gnome-keyring-d >/dev/null || gnome-keyring-daemon --start --components=pkcs11,secrets")
-    hl.exec_cmd("pgrep -f polkit-kde-authentication-agent-1 >/dev/null || /usr/lib/polkit-kde-authentication-agent-1")
+    hl.timer(function()
+        hl.exec_cmd("systemctl --user reset-failed plasma-polkit-agent.service")
+        hl.exec_cmd("systemctl --user restart plasma-polkit-agent.service")
+    end, { timeout = 500, type = "oneshot" })
+    hl.exec_cmd("pgrep -x fortitraylauncher >/dev/null || pgrep -x fortitray >/dev/null || /opt/forticlient/start-fortitray-launcher.sh")
+  
+    hl.exec_cmd("gnome-keyring-daemon --start --components=secrets")
+    --hl.exec_cmd("wl-paste --type text --watch cliphist store")
+    --hl.exec_cmd("wl-paste --type image --watch cliphist store")
+
+
 end)
 
 hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")
@@ -64,6 +70,8 @@ hl.env("XCURSOR_SIZE", "20")
 hl.env("HYPRCURSOR_SIZE", "20")
 hl.env("MOZ_ENABLE_WAYLAND", "1")
 hl.env("BROWSER", "microsoft-edge-stable")
+
+hl.plugin.load(os.getenv("HOME") .. "/.local/src/hypr-autoscroll/build/hypr-autoscroll.so")
 
 hl.config({
     cursor = {
@@ -127,6 +135,17 @@ hl.config({
         sensitivity = 0,
         touchpad = {
             natural_scroll = false,
+        },
+    },
+    plugin = {
+        hypr_autoscroll = {
+            enabled = true,
+            direct_activation = false,
+            button = 274,
+            dead_zone = 12.0,
+            sensitivity = 4.0,
+            horizontal = true,
+            vertical = true,
         },
     },
 })
@@ -243,11 +262,13 @@ local mainMod = "SUPER"
 
 hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(browser))
+hl.bind(mainMod .. " + A", hl.dsp.exec_cmd("hyprctl hypr-autoscroll toggle"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + W", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/open-windows.sh"))
 hl.bind(mainMod .. " + O", hl.dsp.exec_cmd(wallpaperScript .. " next"))
 -- hl.bind(mainMod .. " + SHIFT + O", hl.dsp.exec_cmd(wallpaperScript .. " prev"))
 hl.bind(mainMod .. " + P", hl.dsp.exec_cmd(menu))
+hl.bind(mainMod .. " + S", hl.dsp.exec_cmd("spotify-launcher"))
 -- hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.window.close())
 hl.bind(mainMod .. " + Q", hl.dsp.window.close())
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())
@@ -376,6 +397,19 @@ hl.bind("switch:off:Lid Switch", function()
     hl.dispatch(hl.dsp.dpms({ action = "on" }))
 end, lidBind)
 
+-- window rules
+hl.window_rule({
+    name = "initial-workspace-1",
+    match = { class = "$browser" },
+    workspace = "1",
+})
+
+hl.window_rule({
+    name = "initial-spotify-workspace-2",
+    match = { class = "^spotify$" },
+    workspace = "2",
+})
+
 hl.window_rule({
     name = "suppress-maximize-events",
     match = { class = ".*" },
@@ -400,4 +434,11 @@ hl.layer_rule({
     match = { namespace = "^wofi$" },
     blur = true,
     ignore_alpha = 0.2,
+})
+
+hl.layer_rule({
+    name = "wifi-menu-solid",
+    match = { namespace = "^waybar-wifi$" },
+    blur = false,
+    ignore_alpha = 1,
 })

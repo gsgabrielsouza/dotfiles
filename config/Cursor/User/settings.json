@@ -7,5 +7,17 @@
     "cursor.general.glassShowWarningNotifications": true,
     "cursor.composer.shouldChimeAfterChatFinishes": true,
     "cursor.composer.conversationDensity": "compact-ungrouped",
-    "editor.autoClosingComments": "always"
+    "editor.autoClosingComments": "always",
+    "mssql.connectionGroups": [
+        {
+            "name": "ROOT",
+            "id": "ROOT"
+        }
+    ],
+    "remote.autoForwardPortsSource": "hybrid",
+    "workbench.preferredDarkColorTheme": "Nebula Aura Dark",
+    "editor.stickyScroll.enabled": false,
+    "workbench.editor.titleScrollbarSizing": "large",
+    "claudeCode.preferredLocation": "panel",
+    "claudeCode.hideOnboarding": true
 }

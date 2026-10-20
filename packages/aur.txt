@@ -1,4 +1,9 @@
+claude-desktop
 cursor-bin
+cursor-cli
 enpass-bin
 fnm-bin
+forticlient-vpn
+google-chrome
 microsoft-edge-stable-bin
+postman-bin

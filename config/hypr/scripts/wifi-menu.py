@@ -54,12 +54,18 @@ from gi.repository import Gdk, GLib, Gtk, GtkLayerShell, Pango
 
 CSS = """
 #wifi-popup {
-  background-color: #24273a;
+  background-color: #1e2030;
   border: 1px solid #8aadf4;
   border-radius: 6px;
+  opacity: 1;
 }
-#wifi-popup box {
-  background-color: transparent;
+#wifi-popup box,
+#wifi-popup stack,
+#wifi-popup scrolledwindow,
+#wifi-popup viewport,
+#wifi-popup list,
+#wifi-popup separator {
+  background-color: #1e2030;
 }
 #wifi-dismiss {
   background-color: transparent;
@@ -107,10 +113,8 @@ CSS = """
   padding: 6px 8px;
   font-family: "JetBrains Mono Nerd", monospace;
 }
-#wifi-popup list {
-  background-color: transparent;
-}
 #wifi-popup row {
+  background-color: #1e2030;
   padding: 4px 6px;
   border-radius: 4px;
   min-height: 0;
@@ -119,10 +123,10 @@ CSS = """
   background-color: #363a4f;
 }
 #wifi-popup row.connected {
-  background-color: alpha(#eed49f, 0.12);
+  background-color: #363a4f;
 }
 #wifi-popup scrollbar {
-  background-color: transparent;
+  background-color: #1e2030;
 }
 #wifi-popup scrollbar slider {
   background-color: #494d64;

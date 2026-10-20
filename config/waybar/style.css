@@ -68,20 +68,82 @@ window#waybar {
   border: none;
 }
 
-#workspaces button {
+#custom-ws1,
+#custom-ws2,
+#custom-ws3,
+#custom-ws4,
+#custom-ws5,
+#custom-ws6,
+#custom-ws7,
+#custom-ws8,
+#custom-ws9,
+#custom-ws10 {
+  font-weight: bold;
+  font-size: 12px;
   color: @sapphire;
   border-radius: 0;
   transition: 0.2s ease-out;
   border-bottom: 1px solid transparent;
+  padding: 0 4px;
 }
 
-#workspaces button.urgent {
-  border-bottom: 1px solid @blue;
+#custom-ws1.empty,
+#custom-ws2.empty,
+#custom-ws3.empty,
+#custom-ws4.empty,
+#custom-ws5.empty,
+#custom-ws6.empty,
+#custom-ws7.empty,
+#custom-ws8.empty,
+#custom-ws9.empty,
+#custom-ws10.empty {
+  color: @overlay0;
 }
 
-#workspaces button.active {
-  border-bottom: 1px solid @yellow;
+#custom-ws1.occupied,
+#custom-ws2.occupied,
+#custom-ws3.occupied,
+#custom-ws4.occupied,
+#custom-ws5.occupied,
+#custom-ws6.occupied,
+#custom-ws7.occupied,
+#custom-ws8.occupied,
+#custom-ws9.occupied,
+#custom-ws10.occupied {
+  color: @sky;
+  border-bottom: 1px solid @sapphire;
+}
+
+#custom-ws1.active,
+#custom-ws2.active,
+#custom-ws3.active,
+#custom-ws4.active,
+#custom-ws5.active,
+#custom-ws6.active,
+#custom-ws7.active,
+#custom-ws8.active,
+#custom-ws9.active,
+#custom-ws10.active {
   color: @yellow;
+  border-bottom: 1px solid @yellow;
+}
+
+#custom-ws1.hidden,
+#custom-ws2.hidden,
+#custom-ws3.hidden,
+#custom-ws4.hidden,
+#custom-ws5.hidden,
+#custom-ws6.hidden,
+#custom-ws7.hidden,
+#custom-ws8.hidden,
+#custom-ws9.hidden,
+#custom-ws10.hidden {
+  opacity: 0;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  font-size: 0;
+  border: none;
 }
 
 #tray {
@@ -92,9 +154,11 @@ window#waybar {
 #custom-easyeffects,
 #custom-weather,
 #custom-power,
+#mpris,
 #memory,
 #cpu,
 #network,
+#bluetooth,
 #pulseaudio,
 #backlight,
 #battery,
@@ -107,14 +171,20 @@ window#waybar {
 #custom-easyeffects:hover,
 #custom-weather:hover,
 #custom-power:hover,
+#mpris:hover,
 #memory:hover,
 #cpu:hover,
 #network:hover,
+#bluetooth:hover,
 #pulseaudio:hover,
 #backlight:hover,
 #battery:hover,
 #clock:hover {
   color: @yellow;
+}
+
+#mpris.paused {
+  color: @overlay0;
 }
 
 #battery.warning {
@@ -135,6 +205,16 @@ window#waybar {
 
 #network.disconnected {
   color: @overlay0;
+}
+
+#bluetooth.disabled,
+#bluetooth.off,
+#bluetooth.no-controller {
+  color: @overlay0;
+}
+
+#bluetooth.connected {
+  color: @sapphire;
 }
 
 menu {

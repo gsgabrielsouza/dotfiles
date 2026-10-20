@@ -1,119 +1,109 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-HOST="vpn1-aws.techne.com.br"
-PORT="10443"
-SAML_PORT="8020"
 VPN_NAME="VPN TECHNE"
-
-if [[ -n ${SUDO_USER:-} ]]; then
-  USER_HOME=$(getent passwd "$SUDO_USER" | cut -d: -f6)
-else
-  USER_HOME="$HOME"
-fi
-CONF="${USER_HOME}/.config/openfortivpn/techne.conf"
+FORTIVPN="/usr/bin/fortivpn"
+GUI="/opt/forticlient/gui/FortiClient"
+TRAY="/opt/forticlient/fortitraylauncher"
 
 usage() {
   echo "Uso: $(basename "$0") [connect|disconnect|status]"
-  echo "  connect       Conecta na ${VPN_NAME} (SAML no navegador)"
+  echo "  connect       Conecta na ${VPN_NAME} (SAML no FortiClient)"
   echo "  disconnect    Encerra o túnel"
   echo "  status        Mostra se a VPN está ativa"
 }
 
-need_openfortivpn() {
-  if ! command -v openfortivpn >/dev/null 2>&1; then
-    echo "openfortivpn não está instalado."
-    echo "Instale com: sudo pacman -S openfortivpn"
+need_user() {
+  if [[ $EUID -eq 0 ]]; then
+    echo "O fortivpn precisa rodar como usuário, não como root."
     exit 1
   fi
 }
 
-ensure_conf() {
-  mkdir -p "$(dirname "$CONF")"
-  if [[ ! -f $CONF ]]; then
-    cat >"$CONF" <<EOF
-host = ${HOST}
-port = ${PORT}
-saml-login = ${SAML_PORT}
-set-dns = 1
-set-routes = 1
-EOF
-    if [[ -n ${SUDO_USER:-} ]]; then
-      chown "${SUDO_USER}:${SUDO_USER}" "$(dirname "$CONF")" "$CONF" 2>/dev/null || true
-    fi
+need_fortivpn() {
+  if [[ ! -x $FORTIVPN ]]; then
+    echo "fortivpn não encontrado em ${FORTIVPN}."
+    echo "Instale o FortiClient VPN."
+    exit 1
   fi
 }
 
-real_user() {
-  if [[ -n ${SUDO_USER:-} ]]; then
-    printf '%s\n' "$SUDO_USER"
-  else
-    printf '%s\n' "$USER"
-  fi
+status_line() {
+  "$FORTIVPN" status 2>/dev/null | tr -d '\r' | tail -n 1
 }
 
-open_saml_browser() {
-  local url=$1
-  local user uid
-  user=$(real_user)
-  uid=$(id -u "$user")
-  sudo -u "$user" env \
-    DISPLAY="${DISPLAY:-:1}" \
-    WAYLAND_DISPLAY="${WAYLAND_DISPLAY:-wayland-1}" \
-    XDG_RUNTIME_DIR="/run/user/${uid}" \
-    DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${uid}/bus" \
-    BROWSER="${BROWSER:-microsoft-edge-stable}" \
-    xdg-open "$url" >/dev/null 2>&1 || true
+is_connected() {
+  [[ $(status_line) == *"Status: Connected"* ]]
+}
+
+is_connecting() {
+  [[ $(status_line) == *"Status: Connecting"* ]]
+}
+
+ensure_saml_ui() {
+  if ! pgrep -x fortitraylauncher >/dev/null && ! pgrep -x fortitray >/dev/null; then
+    setsid "$TRAY" >/dev/null 2>&1 &
+  fi
+  if ! pgrep -f "$GUI" >/dev/null; then
+    setsid "$GUI" --ozone-platform=x11 >/dev/null 2>&1 &
+    local i=0
+    while (( i < 25 )) && ! pgrep -f "$GUI" >/dev/null; do
+      sleep 0.2
+      i=$((i + 1))
+    done
+    sleep 1
+  fi
 }
 
 cmd_status() {
-  if pgrep -f "openfortivpn ${HOST}" >/dev/null 2>&1; then
+  need_fortivpn
+  need_user
+  local line
+  line=$(status_line)
+  if is_connected; then
     echo "${VPN_NAME}: conectada"
+    printf '%s\n' "$line"
     ip -br addr show ppp0 2>/dev/null || ip -br addr show tun0 2>/dev/null || true
     return 0
   fi
+  if is_connecting; then
+    echo "${VPN_NAME}: conectando (aguardando SAML)"
+    printf '%s\n' "$line"
+    return 2
+  fi
   echo "${VPN_NAME}: desconectada"
+  printf '%s\n' "$line"
   return 1
 }
 
 cmd_disconnect() {
-  if ! pgrep -f "openfortivpn ${HOST}" >/dev/null 2>&1; then
+  need_fortivpn
+  need_user
+  if ! is_connected && ! is_connecting; then
     echo "${VPN_NAME} já está desconectada."
     return 0
   fi
-  if [[ $EUID -ne 0 ]]; then
-    exec sudo "$0" disconnect
-  fi
-  pkill -f "openfortivpn ${HOST}" || true
+  "$FORTIVPN" disconnect
   echo "${VPN_NAME} desconectada."
 }
 
 cmd_connect() {
-  need_openfortivpn
-  ensure_conf
-  if pgrep -f "openfortivpn ${HOST}" >/dev/null 2>&1; then
+  need_fortivpn
+  need_user
+  if is_connected; then
     echo "${VPN_NAME} já está conectada."
     cmd_status || true
     return 0
   fi
-  if [[ $EUID -ne 0 ]]; then
-    exec sudo --preserve-env=DISPLAY,WAYLAND_DISPLAY,BROWSER "$0" connect
+  if is_connecting; then
+    echo "Há uma conexão pendente. Encerrando para reconectar..."
+    "$FORTIVPN" disconnect >/dev/null 2>&1 || true
+    sleep 1
   fi
-  echo "Conectando ${VPN_NAME} (${HOST}:${PORT})"
-  echo "O navegador vai abrir o login Microsoft. Conclua o SAML e volte ao terminal."
-  stdbuf -oL -eL openfortivpn "${HOST}:${PORT}" \
-    --config="$CONF" \
-    --saml-login="${SAML_PORT}" \
-    2>&1 | while IFS= read -r line; do
-      printf '%s\n' "$line"
-      if [[ $line == *"Authenticate at '"* ]]; then
-        url=${line#*Authenticate at \'}
-        url=${url%%\'*}
-        if [[ -n $url ]]; then
-          open_saml_browser "$url"
-        fi
-      fi
-    done
+  ensure_saml_ui
+  echo "Conectando ${VPN_NAME} via FortiClient"
+  echo "Conclua o login Microsoft na janela SAML do FortiClient."
+  exec "$FORTIVPN" connect "$VPN_NAME"
 }
 
 action=${1:-connect}

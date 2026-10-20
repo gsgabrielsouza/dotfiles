@@ -9,8 +9,12 @@
   "margin-left": 0,
   "margin-right": 0,
   "margin-bottom": 1,
-  "modules-left": ["custom/icon", "hyprland/window", "custom/weather"],
-  "modules-center": ["ext/workspaces"],
+  "modules-left": [
+    "custom/icon", 
+    "hyprland/window", 
+    "custom/weather", 
+    "mpris"],
+  "modules-center": ["group/workspaces"],
   "modules-right": [
     "tray",
    // "custom/helvum",
@@ -18,6 +22,7 @@
    "memory",
    "cpu",
    "network",
+   "bluetooth",
    "pulseaudio",
     "backlight",
     "battery",
@@ -42,25 +47,80 @@
       "com.github.wwmm.easyeffects": "EasyEffects"
     }
   },
-  "ext/workspaces": {
-    "on-click": "activate",
-    "all-outputs": false,
-    "sort-by-id": false,
-    "sort-by-name": false,
-    "sort-by-coordinates": true,
-    "format": "{icon}",
-    "format-icons": {
-      "1": "i",
-      "2": "ii",
-      "3": "iii",
-      "4": "iv",
-      "5": "v",
-      "6": "vi",
-      "7": "vii",
-      "8": "viii",
-      "9": "ix",
-      "10": "x"
-    }
+  "group/workspaces": {
+    "orientation": "horizontal",
+    "modules": [
+      "custom/ws1",
+      "custom/ws2",
+      "custom/ws3",
+      "custom/ws4",
+      "custom/ws5",
+      "custom/ws6",
+      "custom/ws7",
+      "custom/ws8",
+      "custom/ws9",
+      "custom/ws10"
+    ]
+  },
+  "custom/ws1": {
+    "exec": "$HOME/.config/waybar/scripts/ws.sh 1 i",
+    "return-type": "json",
+    "interval": 1,
+    "on-click": "$HOME/.config/waybar/scripts/ws-click.sh 1"
+  },
+  "custom/ws2": {
+    "exec": "$HOME/.config/waybar/scripts/ws.sh 2 ii",
+    "return-type": "json",
+    "interval": 1,
+    "on-click": "$HOME/.config/waybar/scripts/ws-click.sh 2"
+  },
+  "custom/ws3": {
+    "exec": "$HOME/.config/waybar/scripts/ws.sh 3 iii",
+    "return-type": "json",
+    "interval": 1,
+    "on-click": "$HOME/.config/waybar/scripts/ws-click.sh 3"
+  },
+  "custom/ws4": {
+    "exec": "$HOME/.config/waybar/scripts/ws.sh 4 iv",
+    "return-type": "json",
+    "interval": 1,
+    "on-click": "$HOME/.config/waybar/scripts/ws-click.sh 4"
+  },
+  "custom/ws5": {
+    "exec": "$HOME/.config/waybar/scripts/ws.sh 5 v",
+    "return-type": "json",
+    "interval": 1,
+    "on-click": "$HOME/.config/waybar/scripts/ws-click.sh 5"
+  },
+  "custom/ws6": {
+    "exec": "$HOME/.config/waybar/scripts/ws.sh 6 vi",
+    "return-type": "json",
+    "interval": 1,
+    "on-click": "$HOME/.config/waybar/scripts/ws-click.sh 6"
+  },
+  "custom/ws7": {
+    "exec": "$HOME/.config/waybar/scripts/ws.sh 7 vii",
+    "return-type": "json",
+    "interval": 1,
+    "on-click": "$HOME/.config/waybar/scripts/ws-click.sh 7"
+  },
+  "custom/ws8": {
+    "exec": "$HOME/.config/waybar/scripts/ws.sh 8 viii",
+    "return-type": "json",
+    "interval": 1,
+    "on-click": "$HOME/.config/waybar/scripts/ws-click.sh 8"
+  },
+  "custom/ws9": {
+    "exec": "$HOME/.config/waybar/scripts/ws.sh 9 ix",
+    "return-type": "json",
+    "interval": 1,
+    "on-click": "$HOME/.config/waybar/scripts/ws-click.sh 9"
+  },
+  "custom/ws10": {
+    "exec": "$HOME/.config/waybar/scripts/ws.sh 10 x",
+    "return-type": "json",
+    "interval": 1,
+    "on-click": "$HOME/.config/waybar/scripts/ws-click.sh 10"
   },
   "tray": {
     "icon-size": 16,
@@ -68,17 +128,18 @@
     "show-passive-items": true
   },
   "custom/weather": {
-    //"format-icons": ["󰖙", "󰖐", "󰖗", "󰖘", "󰖖"],
-    "exec": "curl -s 'https://wttr.in/Curitiba?format=%20%c%t%27%l'",
+    "exec": "python3 ~/.config/waybar/scripts/weather.py",
+    "return-type": "json",
     "interval": 1800,
     "format": "{icon} {text}",
     "format-icons": {
-    "clear": "󰖙",
-    "clouds": "󰖐",
-    "rain": "󰖗",
-    "snow": "󰖘",
-    "storm": "󰖖"
-  }
+      "clear": "󰖙",
+      "clouds": "󰖐",
+      "rain": "󰖗",
+      "snow": "󰖘",
+      "storm": "󰖖",
+      "default": "󰖐"
+    }
   },
   // "custom/helvum": {
   //   "format": "󰲁",
@@ -139,6 +200,23 @@
     "on-click-right": "nm-connection-editor",
     "interval": 5
   },
+  "bluetooth": {
+    "format": "󰂯",
+    "format-disabled": "󰂲",
+    "format-off": "󰂲",
+    "format-on": "󰂯",
+    "format-connected": "󰂱 {num_connections}",
+    "format-no-controller": "󰂲",
+    "tooltip-format": "{controller_alias}",
+    "tooltip-format-disabled": "Bluetooth desabilitado",
+    "tooltip-format-off": "Bluetooth desligado",
+    "tooltip-format-on": "Ligado · nenhum dispositivo",
+    "tooltip-format-connected": "{num_connections} conectado(s)\n{device_enumerate}",
+    "tooltip-format-enumerate-connected": "{device_alias}",
+    "tooltip-format-no-controller": "Sem adaptador",
+    "on-click": "$HOME/.config/hypr/scripts/bluetooth-menu.py",
+    "on-click-right": "bash -c 'if bluetoothctl show | grep -q \"Powered: yes\"; then bluetoothctl power off; else bluetoothctl power on; fi'"
+  },
   "battery": {
     "interval": 60,
     "states": {
@@ -170,5 +248,29 @@
       "suspend": "systemctl suspend",
       "logout": "hyprctl dispatch exit"
     }
+  },
+  "mpris": {
+    "player": "spotify",
+    "format": "{player_icon} {dynamic}",
+    "format-paused": "{player_icon} {dynamic}",
+    "tooltip-format": "{title}\n{artist}\n{album}",
+    "dynamic-order": ["title", "artist"],
+    "dynamic-separator": " · ",
+    "max-length": 30,
+    "ellipsis": "…",
+    "player-icons": {
+      "default": "󰝚",
+      "spotify": ""
+    },
+    "menu": "on-click",
+    "menu-file": "$HOME/.config/waybar/spotify_menu.xml",
+    "menu-actions": {
+      "play-pause": "playerctl -p spotify play-pause",
+      "previous": "playerctl -p spotify previous",
+      "next": "playerctl -p spotify next",
+      "open": "spotify-launcher"
+    },
+    "on-scroll-up": "playerctl -p spotify previous",
+    "on-scroll-down": "playerctl -p spotify next "
   }
 }
