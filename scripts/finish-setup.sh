@@ -38,6 +38,13 @@ sudo ufw default allow outgoing
 sudo ufw --force enable
 sudo systemctl enable --now ufw.service fail2ban.service
 
+log "Docker com IPv6 (alguns hosts, como archive.apache.org, nao respondem por IPv4 nesta rede)"
+if [[ ! -f /etc/docker/daemon.json ]]; then
+  sudo install -d -m 755 /etc/docker
+  printf '%s\n' '{' '  "ipv6": true,' '  "fixed-cidr-v6": "fd00:d0c:1::/64"' '}' | sudo tee /etc/docker/daemon.json >/dev/null
+  sudo systemctl restart docker.service
+fi
+
 log "SQL Server (${container})"
 sudo systemctl enable --now docker.service
 if sudo docker ps -a --format '{{.Names}}' | grep -Fxq "$container"; then
