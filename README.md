@@ -2,7 +2,7 @@
 
 Replica o ambiente atual (Hyprland, Waybar, Foot, Kitty, Zsh, Starship) **depois** do `archinstall` (profile minimal, Pipewire, NetworkManager). Sway continua instalado como sessao alternativa.
 
-Monitores, particao Windows e VPN neste repo sao da maquina atual. Ajuste `config/hypr/hyprland.lua`, `config/hypr/scripts/mount-windows.sh` e `scripts/home/vpn-techne` antes de usar em outro hardware.
+Monitores e VPN neste repo sao da maquina atual. Ajuste `config/hypr/hyprland.lua` e `scripts/home/vpn-techne` antes de usar em outro hardware.
 
 ## Uso
 
@@ -30,7 +30,7 @@ Arquivos existentes em `~` e `~/.config` sao movidos para `*.bak.<timestamp>` an
 - Tema Catppuccin Macchiato, teclado `br-abnt2`
 - Notebook `eDP-1` @ 120 Hz; HDMI em cima. Workspaces 1–5 no laptop; 6–10 no HDMI quando conectado
 - Browser da sessao: Edge (`Super+B`). O bootstrap ainda define Firefox como padrao xdg
-- Scripts em [`config/hypr/scripts`](config/hypr/scripts): wallpaper, OSD, clipboard, Bluetooth (menu e roteamento de audio), Wi-Fi, calendario, montagem do Windows, Waybar
+- Scripts em [`config/hypr/scripts`](config/hypr/scripts): wallpaper, OSD, clipboard, Bluetooth (menu e roteamento de audio), Wi-Fi, calendario, Waybar
 - Plugin [hypr-autoscroll](https://github.com/estebanhiram/hypr-autoscroll) (autoscroll com botao do meio; `Super+A` liga/desliga), compilado em `~/.local/src/hypr-autoscroll`. O plugin depende da ABI do Hyprland: apos atualizar o Hyprland, rode `make -C ~/.local/src/hypr-autoscroll clean all`
 - VPN via **FortiClient** (tray iniciado com a sessao)
 
@@ -40,7 +40,7 @@ Arquivos existentes em `~` e `~/.config` sao movidos para `*.bak.<timestamp>` an
 - copia configs (Hyprland, Sway, Waybar, Foot, Kitty, UWSM, dunst, btop, htop, EasyEffects, Cursor) e wallpapers
 - compila o plugin hypr-autoscroll (falha nao interrompe o bootstrap)
 - instala `~/scripts/vpn-techne` (`connect` / `disconnect` / `status`, SAML no FortiClient)
-- habilita Docker (grupo `docker`), UFW e power-profiles-daemon (`mount-windows.service` fica instalado, mas desabilitado: habilite com `systemctl --user enable mount-windows.service` se houver particao Windows)
+- habilita Docker (grupo `docker`), UFW e power-profiles-daemon
 - com `--vm`: `virtualbox-guest-utils` + `vboxservice` e overlays em `vm/`
 - define zsh como shell e Firefox como navegador xdg padrao
 
@@ -117,7 +117,6 @@ pacman-conf --repo-list
 | Super+A | liga/desliga autoscroll |
 | Super+O | proximo wallpaper |
 | Super+V | clipboard (cliphist) |
-| Super+W | lista de janelas |
 | Super+L | hyprlock |
 | Super+Q | fecha janela |
 | Super+F | fullscreen |
@@ -126,5 +125,4 @@ pacman-conf --repo-list
 ## Fora dos scripts
 
 - particao/disco, usuario, locale, bootloader e display manager no `archinstall`
-- entrada da particao Windows no `/etc/fstab` (UUID da maquina atual) e Inicializacao Rapida desligada no Windows
 - Shared Folder do VirtualBox (`vboxsf`), se precisar
