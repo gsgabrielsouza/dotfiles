@@ -1,0 +1,17 @@
+width=640
+height=420
+location=center
+show=drun
+prompt=Buscar
+filter_rate=100
+allow_markup=true
+allow_images=true
+image_size=28
+insensitive=true
+no_actions=true
+term=foot
+gtk_dark=true
+key_up=Up,Control_L-k
+key_down=Down,Control_L-j,Tab
+key_expand=Right
+key_exit=Escape

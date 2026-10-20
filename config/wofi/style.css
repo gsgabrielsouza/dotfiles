@@ -1,0 +1,58 @@
+/* Catppuccin Macchiato (mesma paleta da Waybar, Foot e GTK). */
+* {
+  font-family: "Adwaita Sans", sans-serif;
+  font-size: 14px;
+}
+
+window {
+  background-color: rgba(36, 39, 58, 0.92);
+  border: 2px solid #8aadf4;
+  border-radius: 12px;
+}
+
+#outer-box {
+  padding: 12px;
+}
+
+#input {
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  border: 1px solid #363a4f;
+  border-radius: 8px;
+  background-color: #1e2030;
+  color: #cad3f5;
+  caret-color: #8aadf4;
+}
+
+#input:focus {
+  border-color: #8aadf4;
+  box-shadow: none;
+}
+
+#scroll,
+#inner-box {
+  background-color: transparent;
+}
+
+#entry {
+  padding: 6px 10px;
+  border-radius: 8px;
+  color: #cad3f5;
+}
+
+#entry:selected {
+  background-color: #363a4f;
+  outline: none;
+}
+
+#entry:selected #text {
+  color: #8aadf4;
+}
+
+#img {
+  margin-right: 10px;
+}
+
+#text {
+  color: #cad3f5;
+}
