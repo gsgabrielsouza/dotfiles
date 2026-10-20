@@ -147,7 +147,6 @@ fi
 chmod +x "$HOME/scripts/vpn-techne" 2>/dev/null || true
 
 systemctl --user daemon-reload 2>/dev/null || true
-systemctl --user enable mount-windows.service 2>/dev/null || true
 
 if (( vm )); then
   install "$dotfiles/vm/home/.zshenv" "$HOME/.zshenv"

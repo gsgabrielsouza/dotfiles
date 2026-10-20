@@ -40,7 +40,7 @@ Arquivos existentes em `~` e `~/.config` sao movidos para `*.bak.<timestamp>` an
 - copia configs (Hyprland, Sway, Waybar, Foot, Kitty, UWSM, dunst, btop, htop, EasyEffects, Cursor) e wallpapers
 - compila o plugin hypr-autoscroll (falha nao interrompe o bootstrap)
 - instala `~/scripts/vpn-techne` (`connect` / `disconnect` / `status`, SAML no FortiClient)
-- habilita Docker (grupo `docker`), UFW, power-profiles-daemon e `mount-windows.service`
+- habilita Docker (grupo `docker`), UFW e power-profiles-daemon (`mount-windows.service` fica instalado, mas desabilitado: habilite com `systemctl --user enable mount-windows.service` se houver particao Windows)
 - com `--vm`: `virtualbox-guest-utils` + `vboxservice` e overlays em `vm/`
 - define zsh como shell e Firefox como navegador xdg padrao
 

@@ -28,6 +28,11 @@ local osdScript = os.getenv("HOME") .. "/.config/hypr/scripts/osd.sh"
 
 hl.exec_cmd('gsettings set org.gnome.desktop.interface gtk-theme "adw-gtk3-dark"')
 hl.exec_cmd('gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"')
+hl.exec_cmd('gsettings set org.cinnamon.desktop.interface gtk-theme "adw-gtk3-dark"')
+hl.exec_cmd('gsettings set org.cinnamon.desktop.interface icon-theme "Adwaita"')
+hl.exec_cmd('gsettings set org.cinnamon.desktop.interface font-name "Adwaita Sans 11"')
+hl.exec_cmd('gsettings set org.cinnamon.desktop.interface cursor-theme "Adwaita"')
+hl.exec_cmd('gsettings set org.cinnamon.desktop.interface cursor-size 20')
 hl.exec_cmd("pgrep -x hyprpaper >/dev/null || hyprpaper")
 hl.exec_cmd("pgrep -x hypridle >/dev/null || hypridle")
 hl.exec_cmd("pgrep -x dunst >/dev/null || dunst")

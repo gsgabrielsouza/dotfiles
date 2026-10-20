@@ -19,5 +19,6 @@
     "editor.stickyScroll.enabled": false,
     "workbench.editor.titleScrollbarSizing": "large",
     "claudeCode.preferredLocation": "panel",
-    "claudeCode.hideOnboarding": true
+    "claudeCode.hideOnboarding": true,
+    "cursor.composer.queueManualSendBehavior2": "steer"
 }
