@@ -20,7 +20,7 @@ log() {
 sudo -v
 
 log "Pacotes: SDDM, Xorg (greeter), NVIDIA, fail2ban, DBeaver, Java 11, flyctl"
-sudo pacman -S --needed --noconfirm sddm xorg-server nvidia-open nvidia-utils fail2ban dbeaver jdk11-openjdk
+sudo pacman -S --needed --noconfirm sddm xorg-server nvidia-open nvidia-utils fail2ban dbeaver jdk11-openjdk cinnamon-translations
 yay -S --needed --noconfirm flyctl-bin
 
 log "Tela de login (SDDM) e nvidia-drm"

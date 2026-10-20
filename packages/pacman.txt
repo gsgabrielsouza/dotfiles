@@ -95,3 +95,4 @@ sddm
 xorg-server
 dbeaver
 jdk11-openjdk
+cinnamon-translations
