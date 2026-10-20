@@ -44,6 +44,12 @@ if [[ ! -f /etc/docker/daemon.json ]]; then
   printf '%s\n' '{' '  "data-root": "/home/docker",' '  "ipv6": true,' '  "fixed-cidr-v6": "fd00:d0c:1::/64"' '}' | sudo tee /etc/docker/daemon.json >/dev/null
   sudo systemctl restart docker.service
 fi
+# Desde o Docker 29 as imagens ficam no containerd; tambem vao para /home.
+if [[ ! -f /etc/containerd/config.toml ]]; then
+  sudo install -d -m 755 /etc/containerd
+  printf '%s\n' 'version = 4' "root = '/home/containerd'" | sudo tee /etc/containerd/config.toml >/dev/null
+  sudo systemctl restart containerd.service docker.service
+fi
 
 log "SQL Server (${container})"
 sudo systemctl enable --now docker.service
