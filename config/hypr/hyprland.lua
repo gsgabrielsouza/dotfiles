@@ -34,6 +34,12 @@ hl.exec_cmd("pgrep -x dunst >/dev/null || dunst")
 hl.exec_cmd("pgrep -x gnome-keyring-d >/dev/null || gnome-keyring-daemon --start --components=pkcs11,secrets")
 hl.exec_cmd("systemctl --user start plasma-polkit-agent.service")
 hl.exec_cmd(wallpaperScript .. " daemon")
+-- hyprland.start nem sempre dispara; estes comandos sao idempotentes e tambem rodam no load do config.
+hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE")
+hl.exec_cmd("pgrep -x waybar >/dev/null || " .. waybar)
+hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/clipboard-watch.sh")
+hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/bt-audio-watch.sh")
+hl.exec_cmd("pgrep -x fortitraylauncher >/dev/null || pgrep -x fortitray >/dev/null || /opt/forticlient/start-fortitray-launcher.sh")
 
 
 hl.on("hyprland.start", function()

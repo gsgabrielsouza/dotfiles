@@ -13,7 +13,10 @@ chmod +x bootstrap.sh scripts/setup-dev-env.sh
 ./bootstrap.sh          # maquina fisica
 ./bootstrap.sh --vm     # VirtualBox (guest utils, output Virtual-1)
 ./scripts/setup-dev-env.sh
+./scripts/finish-setup.sh   # tela de login, NVIDIA, fail2ban e restore do SQL Server
 ```
+
+Rode os scripts **sem** `sudo` (eles chamam `sudo` quando precisam). Com `sudo ./bootstrap.sh` as configs vao para `/root` e o shell/grupo docker sao aplicados ao root.
 
 O bootstrap deixa o desktop e o Docker prontos. O `setup-dev-env.sh` e o segundo passo: toolchain .NET/Angular, pentest no host, lab isolado e hardening. Confirme cada bloco.
 
@@ -40,6 +43,13 @@ Arquivos existentes em `~` e `~/.config` sao movidos para `*.bak.<timestamp>` an
 - habilita Docker (grupo `docker`), UFW, power-profiles-daemon e `mount-windows.service`
 - com `--vm`: `virtualbox-guest-utils` + `vboxservice` e overlays em `vm/`
 - define zsh como shell e Firefox como navegador xdg padrao
+
+## O que o finish-setup faz
+
+- instala SDDM + Xorg (greeter) e aplica [`config/hypr/scripts/fix-sddm-boot.sh`](config/hypr/scripts/fix-sddm-boot.sh) (sessao Hyprland, espera o `nvidia_drm`)
+- instala `nvidia-open` + `nvidia-utils`: o HDMI do notebook esta ligado na RTX 3050 e com `nouveau` o Hyprland deixa a tela preta
+- UFW (deny incoming) + fail2ban
+- cria/inicia o container `sqlserver-dev` e restaura `cronosLocal.bak` do HD de backup (padrao: `/run/media/$USER/SAMSUNG/backup-linux/2026-10-19/docker/sqlserver_data`, ou passe o diretorio como argumento)
 
 ## O que o setup-dev-env faz
 
