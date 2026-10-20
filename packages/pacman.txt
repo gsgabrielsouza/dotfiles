@@ -93,3 +93,4 @@ zsh-completions
 zsh-syntax-highlighting
 sddm
 xorg-server
+dbeaver

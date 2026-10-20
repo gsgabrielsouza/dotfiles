@@ -20,10 +20,16 @@ log() {
 sudo -v
 
 log "Pacotes: SDDM, Xorg (greeter), NVIDIA, fail2ban"
-sudo pacman -S --needed --noconfirm sddm xorg-server nvidia-open nvidia-utils fail2ban
+sudo pacman -S --needed --noconfirm sddm xorg-server nvidia-open nvidia-utils fail2ban dbeaver
 
 log "Tela de login (SDDM) e nvidia-drm"
 sudo bash "$dotfiles/config/hypr/scripts/fix-sddm-boot.sh"
+
+log "Rede: wait-online aceita qualquer interface (Ethernet sem cabo travava o boot por 2 min)"
+sudo install -d -m 755 /etc/systemd/system/systemd-networkd-wait-online.service.d
+printf '%s\n' '[Service]' 'ExecStart=' 'ExecStart=/usr/lib/systemd/systemd-networkd-wait-online --any --timeout=15' |
+  sudo tee /etc/systemd/system/systemd-networkd-wait-online.service.d/any.conf >/dev/null
+sudo systemctl daemon-reload
 
 log "Hardening: UFW deny incoming + fail2ban"
 sudo ufw default deny incoming
