@@ -44,7 +44,8 @@
       "microsoft-edge": "Browser",
       "cursor": "Editor",
       "org.pipewire.Helvum": "Helvum",
-      "com.github.wwmm.easyeffects": "EasyEffects"
+      "com.github.wwmm.easyeffects": "EasyEffects",
+      "com.anthropic.Claude": "Claudião"
     }
   },
   "group/workspaces": {
