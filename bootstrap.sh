@@ -138,6 +138,10 @@ autoscroll_dir="$HOME/.local/src/hypr-autoscroll"
 if [[ ! -d $autoscroll_dir/.git ]]; then
   git clone https://github.com/estebanhiram/hypr-autoscroll.git "$autoscroll_dir"
 fi
+autoscroll_patch="$dotfiles/patches/hypr-autoscroll-hyprland-0.57.patch"
+if git -C "$autoscroll_dir" apply --check "$autoscroll_patch" 2>/dev/null; then
+  git -C "$autoscroll_dir" apply "$autoscroll_patch"
+fi
 if ! make -C "$autoscroll_dir"; then
   printf '%s\n' "Falha ao compilar o hypr-autoscroll; o Hyprland sobe sem o plugin." >&2
 fi

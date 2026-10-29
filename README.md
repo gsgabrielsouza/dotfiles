@@ -31,7 +31,7 @@ Arquivos existentes em `~` e `~/.config` sao movidos para `*.bak.<timestamp>` an
 - Notebook `eDP-1` @ 120 Hz; HDMI em cima. Workspaces 1–5 no laptop; 6–10 no HDMI quando conectado
 - Browser da sessao: Edge (`Super+B`). O bootstrap ainda define Firefox como padrao xdg
 - Scripts em [`config/hypr/scripts`](config/hypr/scripts): wallpaper, OSD, clipboard, Bluetooth (menu e roteamento de audio), Wi-Fi, calendario, Waybar
-- Plugin [hypr-autoscroll](https://github.com/estebanhiram/hypr-autoscroll) (autoscroll com botao do meio; `Super+A` liga/desliga), compilado em `~/.local/src/hypr-autoscroll`. O plugin depende da ABI do Hyprland: apos atualizar o Hyprland, rode `make -C ~/.local/src/hypr-autoscroll clean all`
+- Plugin [hypr-autoscroll](https://github.com/estebanhiram/hypr-autoscroll) (autoscroll com botao do meio; `Super+A` liga/desliga), compilado em `~/.local/src/hypr-autoscroll`. O plugin depende da ABI do Hyprland: apos atualizar o Hyprland, rode `make -C ~/.local/src/hypr-autoscroll clean all`. O bootstrap aplica `patches/hypr-autoscroll-hyprland-0.57.patch` (suporte a API de plugins do Hyprland 0.57, ainda nao incorporado upstream)
 - VPN via **FortiClient** (tray iniciado com a sessao)
 
 ## O que o bootstrap faz

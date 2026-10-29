@@ -1,0 +1,67 @@
+From f4c4f3107814a21ddc02603d5f69d5ac73bb11df Mon Sep 17 00:00:00 2001
+From: gsgabrielsouza <souza.gabrielluis@gmail.com>
+Date: Thu, 29 Oct 2026 09:45:16 -0300
+Subject: [PATCH] Support Hyprland 0.57 plugin API
+
+Hyprland 0.57 moved hyprctl commands to IPC::Socket1 (SCommand with a
+handler taking SRequest) and stubbed addDispatcherV2 to always fail.
+Register the hyprctl command with the new API and skip the legacy
+dispatchers there, so the plugin loads instead of throwing in init.
+Older Hyprland versions keep the previous code paths.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/main.cpp | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
+
+diff --git a/src/main.cpp b/src/main.cpp
+index ddbcd2b..1b37289 100644
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -33,6 +33,14 @@
+ #include <hyprland/src/managers/cursor/CursorShapeOverrideController.hpp>
+ #endif
+ 
++#if __has_include(<hyprland/src/ipc/s1/S1.hpp>)
++#define HYPR_AUTOSCROLL_SOCKET1_API 1
++#include <hyprland/src/ipc/s1/S1.hpp>
++using eHyprCtlOutputFormat = IPC::Socket1::eOutputFormat;
++using SHyprCtlCommand      = IPC::Socket1::SCommand;
++using IPC::Socket1::FORMAT_JSON;
++#endif
++
+ extern "C" {
+ #include <lauxlib.h>
+ #include <lua.h>
+@@ -499,6 +507,8 @@ APICALL EXPORT PLUGIN_DESCRIPTION_INFO PLUGIN_INIT(HANDLE handle) {
+ 
+     registerConfigValues();
+ 
++#ifndef HYPR_AUTOSCROLL_SOCKET1_API
++    // Hyprland 0.57+ removed legacy dispatchers; control goes through hyprctl and Lua instead.
+     if (!HyprlandAPI::addDispatcherV2(pluginHandle, "hypr-autoscroll:toggle", dispatchToggle)) {
+         throw std::runtime_error("hypr-autoscroll: failed to register dispatcher");
+     }
+@@ -506,9 +516,19 @@ APICALL EXPORT PLUGIN_DESCRIPTION_INFO PLUGIN_INIT(HANDLE handle) {
+     if (!HyprlandAPI::addDispatcherV2(pluginHandle, "hypr-autoscroll:middle-mode", dispatchMiddleMode)) {
+         throw std::runtime_error("hypr-autoscroll: failed to register middle-mode dispatcher");
+     }
++#endif
+ 
++#ifdef HYPR_AUTOSCROLL_SOCKET1_API
++    state.hyprctlCommand = HyprlandAPI::registerHyprCtlCommand(
++        pluginHandle, {.name    = "hypr-autoscroll",
++                       .match   = IPC::Socket1::COMMAND_MATCH_PREFIX,
++                       .handler = [](const IPC::Socket1::SRequest& request) -> IPC::Socket1::SResponse {
++                           return hyprctlAutoscroll(request.format, request.command);
++                       }});
++#else
+     state.hyprctlCommand = HyprlandAPI::registerHyprCtlCommand(
+         pluginHandle, {.name = "hypr-autoscroll", .exact = false, .fn = hyprctlAutoscroll});
++#endif
+     if (!state.hyprctlCommand)
+         throw std::runtime_error("hypr-autoscroll: failed to register hyprctl command");
+ 
+-- 
+2.56.0
+
