@@ -1,6 +1,6 @@
 # Dotfiles Arch + Hyprland
 
-Replica o ambiente atual (Hyprland, Waybar, Foot, Kitty, Zsh, Starship) **depois** do `archinstall` (profile minimal, Pipewire, NetworkManager). Sway continua instalado como sessao alternativa.
+Replica o ambiente atual (Hyprland, tide-island, Foot, Kitty, Zsh, Starship) **depois** do `archinstall` (profile minimal, Pipewire, NetworkManager). Sway continua instalado como sessao alternativa.
 
 Monitores e VPN neste repo sao da maquina atual. Ajuste `config/hypr/hyprland.lua` e `scripts/home/vpn-techne` antes de usar em outro hardware.
 
@@ -24,20 +24,20 @@ Arquivos existentes em `~` e `~/.config` sao movidos para `*.bak.<timestamp>` an
 
 ## Desktop
 
-- **Hyprland** (Lua) + **UWSM**, lock/idle/wallpaper via hyprlock, hypridle e hyprpaper
-- **Waybar**: workspaces (scripts proprios), janela, clima, player (mpris), CPU/RAM, rede (menu Wi-Fi), Bluetooth, audio, brilho, bateria, relogio e powermenu
-- Terminais **Foot** (Super+Return) e **Kitty**; launcher **Wofi**; arquivos **Nemo**
+- **Hyprland** (Lua) + **UWSM**, idle/wallpaper via hypridle e hyprpaper; lock screen pelo tide-island (hyprlock continua nos configs, comentado)
+- **tide-island** (Quickshell): dynamic island com player (mpris + favoritar via Spicetify), notificacoes, clipboard, launcher, Control Center (Wi-Fi, Bluetooth, brilho, volume), calendario, clima, workspaces/overview, wallpaper picker, menu de energia e lock screen. Config em [`config/tide-island`](config/tide-island) (atalhos em [`atalhos.md`](config/tide-island/atalhos.md)). O **dunst** roda pausado so como daemon de notificacoes (a ilha as exibe). Waybar nao inicia mais (config mantida no repo); sem tray, os icones de udiskie/FortiClient/Teams nao aparecem
+- Terminais **Foot** (Super+Return) e **Kitty**; launcher da ilha (`Super+P`); arquivos **Nemo**
 - Tema Catppuccin Macchiato, teclado `br-abnt2`
 - Notebook `eDP-1` @ 120 Hz; HDMI em cima. Workspaces 1–5 no laptop; 6–10 no HDMI quando conectado
 - Browser da sessao: Edge (`Super+B`). O bootstrap ainda define Firefox como padrao xdg
-- Scripts em [`config/hypr/scripts`](config/hypr/scripts): wallpaper, OSD, clipboard, Bluetooth (menu e roteamento de audio), Wi-Fi, calendario, Waybar
+- Scripts em [`config/hypr/scripts`](config/hypr/scripts): wallpaper, OSD, clipboard, Bluetooth (menu e roteamento de audio), Wi-Fi, calendario, Waybar (legado)
 - Plugin [hypr-autoscroll](https://github.com/estebanhiram/hypr-autoscroll) (autoscroll com botao do meio; `Super+A` liga/desliga), compilado em `~/.local/src/hypr-autoscroll`. O plugin depende da ABI do Hyprland: apos atualizar o Hyprland, rode `make -C ~/.local/src/hypr-autoscroll clean all`. O bootstrap aplica `patches/hypr-autoscroll-hyprland-0.57.patch` (suporte a API de plugins do Hyprland 0.57, ainda nao incorporado upstream)
 - VPN via **FortiClient** (tray iniciado com a sessao)
 
 ## O que o bootstrap faz
 
-- instala pacotes oficiais ([`packages/pacman.txt`](packages/pacman.txt)) e AUR ([`packages/aur.txt`](packages/aur.txt): Cursor, Enpass, fnm, Edge, Chrome, FortiClient VPN, Postman, Claude Desktop)
-- copia configs (Hyprland, Sway, Waybar, Foot, Kitty, UWSM, dunst, btop, htop, EasyEffects, Cursor) e wallpapers
+- instala pacotes oficiais ([`packages/pacman.txt`](packages/pacman.txt)) e AUR ([`packages/aur.txt`](packages/aur.txt): Cursor, Enpass, fnm, Edge, Chrome, FortiClient VPN, Postman, Claude Desktop, tide-island)
+- copia configs (Hyprland, tide-island, Sway, Waybar, Foot, Kitty, UWSM, dunst, btop, htop, EasyEffects, Cursor) e wallpapers
 - compila o plugin hypr-autoscroll (falha nao interrompe o bootstrap)
 - instala `~/scripts/vpn-techne` (`connect` / `disconnect` / `status`, SAML no FortiClient)
 - habilita Docker (grupo `docker`), UFW e power-profiles-daemon
@@ -112,12 +112,22 @@ pacman-conf --repo-list
 | Super+Return | Foot |
 | Super+B | Edge |
 | Super+E | Nemo |
-| Super+P | Wofi |
-| Super+S | Spotify |
+| Super+P | launcher da ilha |
+| Super+S | player da ilha |
+| Super+Alt+S | Spotify |
 | Super+A | liga/desliga autoscroll |
 | Super+O | proximo wallpaper |
-| Super+V | clipboard (cliphist) |
-| Super+L | hyprlock |
+| Super+V | clipboard da ilha |
+| Super+L | lock screen da ilha |
+| Super+I / Super+Tab | mostra/esconde a ilha |
+| Super+N | central de notificacoes |
+| Super+X | Control Center (Wi-Fi, Bluetooth, brilho, volume) |
+| Super+W | clima |
+| Super+Esc | menu de energia |
+| Super+Ctrl+Tab | overview de workspaces |
+| Super+Alt+C | calendario |
+| Super+Alt+F | file shelf |
+| Super+Alt+O | seletor de wallpaper |
 | Super+Q | fecha janela |
 | Super+F | fullscreen |
 | Super+Shift+E | sai da sessao |
