@@ -1,0 +1,14 @@
+{
+  "preferences": {
+    "remoteToolsDeviceName": "gsarch",
+    "coworkWebSearchEnabled": true,
+    "coworkScheduledTasksEnabled": true,
+    "ccdScheduledTasksEnabled": true,
+    "orgWorkAcrossAppsDisabled": false,
+    "coworkPreferredBrowser": "built_in",
+    "coworkBrowserToolsEnabled": true,
+    "sidebarMode": "epitaxy",
+    "coworkHipaaRestricted": false
+  },
+  "coworkUserFilesPath": "/home/gs/Claude"
+}
