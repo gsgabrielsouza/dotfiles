@@ -1,0 +1,35 @@
+{
+    "clockFormat": "24",
+    "heroFontFamily": "JetBrainsMono Nerd Font",
+    "hoverExpandAction": 1,
+    "iconFontFamily": "JetBrainsMono Nerd Font",
+    "lockScreen": {
+        "avatarPath": "",
+        "blur": 48,
+        "cardOpacity": 82,
+        "customLayoutEnabled": true,
+        "dim": 32,
+        "displayName": "gs",
+        "layout": "dashboard",
+        "message": "10000",
+        "positions": {
+        },
+        "radius": 28,
+        "showAlbumArt": true,
+        "showAvatar": true,
+        "showBattery": true,
+        "showClock": true,
+        "showDate": true,
+        "showMusic": true,
+        "showName": true,
+        "showSeconds": true,
+        "showTrackInfo": true,
+        "showWeather": true,
+        "use24Hour": true,
+        "wallpaperPath": ""
+    },
+    "textFontFamily": "JetBrainsMono Nerd Font",
+    "timeFontFamily": "JetBrainsMono Nerd Font",
+    "wallpaperLibraryPath": "/home/gs/wallpapers",
+    "weatherLocation": ""
+}

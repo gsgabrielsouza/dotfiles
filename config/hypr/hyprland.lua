@@ -25,6 +25,7 @@ local browser = "microsoft-edge-stable"
 local waybar = os.getenv("HOME") .. "/.config/hypr/scripts/start-waybar.sh"
 local wallpaperScript = os.getenv("HOME") .. "/.config/hypr/scripts/wallpaper.sh"
 local osdScript = os.getenv("HOME") .. "/.config/hypr/scripts/osd.sh"
+local tide = "quickshell ipc --any-display -p /usr/share/tide-island call "
 
 hl.exec_cmd('gsettings set org.gnome.desktop.interface gtk-theme "adw-gtk3-dark"')
 hl.exec_cmd('gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"')
@@ -35,17 +36,18 @@ hl.exec_cmd('gsettings set org.cinnamon.desktop.interface cursor-theme "Adwaita"
 hl.exec_cmd('gsettings set org.cinnamon.desktop.interface cursor-size 20')
 hl.exec_cmd("pgrep -x hyprpaper >/dev/null || hyprpaper")
 hl.exec_cmd("pgrep -x hypridle >/dev/null || hypridle")
-hl.exec_cmd("pgrep -x dunst >/dev/null || dunst")
 hl.exec_cmd("pgrep -x gnome-keyring-d >/dev/null || gnome-keyring-daemon --start --components=pkcs11,secrets")
 hl.exec_cmd("systemctl --user start plasma-polkit-agent.service")
 hl.exec_cmd(wallpaperScript .. " daemon")
 -- hyprland.start nem sempre dispara; estes comandos sao idempotentes e tambem rodam no load do config.
 hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE")
-hl.exec_cmd("pgrep -x waybar >/dev/null || " .. waybar)
 hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/clipboard-watch.sh")
 hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/bt-audio-watch.sh")
 hl.exec_cmd("pgrep -x fortitraylauncher >/dev/null || pgrep -x fortitray >/dev/null || /opt/forticlient/start-fortitray-launcher.sh")
 hl.exec_cmd("pgrep -x udiskie >/dev/null || udiskie --automount --notify --smart-tray --appindicator")
+hl.exec_cmd("pgrep -x dunst >/dev/null || dunst")
+hl.exec_cmd("sleep 1; dunstctl set-paused true") -- dunst so como daemon; a ilha exibe as notificacoes
+hl.exec_cmd("tide-island")
 
 
 hl.on("hyprland.start", function()
@@ -53,10 +55,6 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE QT_QPA_PLATFORM DISPLAY")
     hl.exec_cmd("pgrep -x hyprpaper >/dev/null || hyprpaper")
     hl.exec_cmd("pgrep -x hypridle >/dev/null || hypridle")
-    hl.exec_cmd("systemctl --user restart dunst.service")
-    hl.timer(function()
-        hl.exec_cmd("pgrep -x waybar >/dev/null || " .. waybar)
-    end, { timeout = 400, type = "oneshot" })
     hl.exec_cmd(wallpaperScript .. " daemon")
     hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/clipboard-watch.sh")
     hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/bt-autoconnect.sh")
@@ -70,6 +68,9 @@ hl.on("hyprland.start", function()
     hl.timer(function()
         hl.exec_cmd("pgrep -x udiskie >/dev/null || udiskie --automount --notify --smart-tray --appindicator")
     end, { timeout = 800, type = "oneshot" })
+    hl.timer(function()
+        hl.exec_cmd("tide-island")
+    end, { timeout = 600, type = "oneshot" })
   
     hl.exec_cmd("gnome-keyring-daemon --start --components=secrets")
     --hl.exec_cmd("wl-paste --type text --watch cliphist store")
@@ -85,7 +86,31 @@ hl.env("HYPRCURSOR_SIZE", "20")
 hl.env("MOZ_ENABLE_WAYLAND", "1")
 hl.env("BROWSER", "microsoft-edge-stable")
 
-hl.plugin.load(os.getenv("HOME") .. "/.local/src/hypr-autoscroll/build/hypr-autoscroll.so")
+local autoscrollPlugin = os.getenv("HOME") .. "/.local/src/hypr-autoscroll/build/hypr-autoscroll.so"
+
+hl.plugin.load(autoscrollPlugin)
+
+local function configureAutoscroll()
+    if not hl.plugin.hypr_autoscroll then
+        return
+    end
+
+    hl.config({
+        plugin = {
+            hypr_autoscroll = {
+                enabled = true,
+                direct_activation = false,
+                button = 274,
+                dead_zone = 12.0,
+                sensitivity = 4.0,
+                horizontal = true,
+                vertical = true,
+            },
+        },
+    })
+end
+
+configureAutoscroll()
 
 hl.config({
     cursor = {
@@ -149,17 +174,6 @@ hl.config({
         sensitivity = 0,
         touchpad = {
             natural_scroll = false,
-        },
-    },
-    plugin = {
-        hypr_autoscroll = {
-            enabled = true,
-            direct_activation = false,
-            button = 274,
-            dead_zone = 12.0,
-            sensitivity = 4.0,
-            horizontal = true,
-            vertical = true,
         },
     },
 })
@@ -280,14 +294,20 @@ hl.bind(mainMod .. " + A", hl.dsp.exec_cmd("hyprctl hypr-autoscroll toggle"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + O", hl.dsp.exec_cmd(wallpaperScript .. " next"))
 -- hl.bind(mainMod .. " + SHIFT + O", hl.dsp.exec_cmd(wallpaperScript .. " prev"))
-hl.bind(mainMod .. " + P", hl.dsp.exec_cmd(menu))
-hl.bind(mainMod .. " + S", hl.dsp.exec_cmd("spotify-launcher"))
+-- hl.bind(mainMod .. " + P", hl.dsp.exec_cmd(menu))  -- wofi drun (substituido pelo lancador da ilha)
+hl.bind(mainMod .. " + P", hl.dsp.exec_cmd(tide .. "tide toggleApplicationLauncher"))
+-- SUPER+S agora abre o player da ilha; o Spotify abre em SUPER+ALT+S
+hl.bind(mainMod .. " + S", hl.dsp.exec_cmd(tide .. "tide togglePlayer"))
+hl.bind(mainMod .. " + ALT + S", hl.dsp.exec_cmd("spotify-launcher"))
 hl.bind(mainMod .. " + U", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/usb-eject.sh"))
--- hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.window.close())
+hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.exec_cmd("kill $(hyprctl activewindow -j | jq -r .pid)"))
 hl.bind(mainMod .. " + Q", hl.dsp.window.close())
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())
+-- hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("pidof hyprlock || hyprlock"), { locked = true })
+hl.bind(mainMod .. " + L", hl.dsp.exec_cmd(tide .. "tide lockScreen"), { locked = true })
 hl.bind(mainMod .. " + SHIFT + SPACE", hl.dsp.window.float({ action = "toggle" }))
-hl.bind(mainMod .. " + V", hl.dsp.exec_cmd('cliphist list | wofi --dmenu --prompt clipboard | cliphist decode | wl-copy'))
+-- hl.bind(mainMod .. " + V", hl.dsp.exec_cmd('cliphist list | wofi --dmenu --prompt clipboard | cliphist decode | wl-copy'))
+hl.bind(mainMod .. " + V", hl.dsp.exec_cmd(tide .. "tide toggleClipboard"))
 hl.bind(mainMod .. " + slash", hl.dsp.layout("togglesplit"))
 hl.bind(mainMod .. " + SHIFT + C", hl.dsp.exec_cmd("hyprctl reload"))
 hl.bind(mainMod .. " + SHIFT + E", hl.dsp.exit())
@@ -351,9 +371,17 @@ for i = 6, 10 do
     hl.bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }))
 end
 
-hl.bind(mainMod .. " + TAB", hl.dsp.exec_cmd("pgrep -x waybar >/dev/null && killall -SIGUSR1 waybar || " .. waybar), { release = true })
-hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("dunstctl history-pop"))
-hl.bind(mainMod .. " + SHIFT + N", hl.dsp.exec_cmd("dunstctl close-all"))
+-- tide-island: SUPER+tecla = acesso rapido; SUPER+ALT+tecla = extras
+hl.bind(mainMod .. " + TAB", hl.dsp.exec_cmd(tide .. "island toggle"), { release = true })
+hl.bind(mainMod .. " + I", hl.dsp.exec_cmd(tide .. "island toggle"))
+hl.bind(mainMod .. " + N", hl.dsp.exec_cmd(tide .. "tide toggleNotificationCenter"))
+hl.bind(mainMod .. " + X", hl.dsp.exec_cmd(tide .. "tide toggleControlCenter"))
+hl.bind(mainMod .. " + W", hl.dsp.exec_cmd(tide .. "tide toggleWeather"))
+hl.bind(mainMod .. " + ESCAPE", hl.dsp.exec_cmd(tide .. "tide togglePowerMenu"))
+hl.bind(mainMod .. " + CTRL + TAB", hl.dsp.exec_cmd(tide .. "overview toggle"))
+hl.bind(mainMod .. " + ALT + C", hl.dsp.exec_cmd(tide .. "tide toggleCalendar"))
+hl.bind(mainMod .. " + ALT + F", hl.dsp.exec_cmd(tide .. "tide toggleFileShelf"))
+hl.bind(mainMod .. " + ALT + O", hl.dsp.exec_cmd(tide .. "tide toggleWallpaperPicker"))
 hl.bind("PRINT", hl.dsp.exec_cmd("hyprshot -m region --freeze --clipboard-only"))
 hl.bind(mainMod .. " + PRINT", hl.dsp.exec_cmd("hyprshot -m region --freeze -o " .. os.getenv("HOME") .. "/Pictures/Screenshots"))
 
@@ -414,8 +442,16 @@ hl.window_rule({
 
 hl.window_rule({
     name = "suppress-maximize-events",
-    match = { class = ".*" },
+    match = { class = "negative:^enpass$" },
     suppress_event = "maximize",
+})
+
+hl.window_rule({
+    name = "enpass-assistant-keep",
+    match = { class = "^enpass$" },
+    float = true,
+    center = true,
+    focus_on_activate = true,
 })
 
 hl.window_rule({
@@ -436,6 +472,12 @@ hl.layer_rule({
     match = { namespace = "^wofi$" },
     blur = true,
     ignore_alpha = 0.2,
+})
+
+hl.layer_rule({
+    name = "tide-island-native-morph",
+    match = { namespace = "^tide-island$" },
+    no_anim = true,
 })
 
 hl.layer_rule({
